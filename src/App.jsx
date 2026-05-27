@@ -694,8 +694,9 @@ function ChatSection() {
   const nextId = useRef(0)
 
   useEffect(() => {
+    if (messages.length === 0 && !loading && !isTyping) return
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, typingText, loading])
+  }, [messages, typingText, loading, isTyping])
 
   const animateTyping = useCallback((text, onDone) => {
     setIsTyping(true)
