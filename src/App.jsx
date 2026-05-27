@@ -396,7 +396,7 @@ function Nav({ active }) {
 
 function Hero() {
   return (
-    <section id="hero" style={{ paddingTop: 130, paddingBottom: 88, position: 'relative' }}>
+    <section id="hero" style={{ paddingTop: 130, paddingBottom: 48, position: 'relative' }}>
       {/* Soft radial glow */}
       <div style={{
         position: 'absolute',
@@ -437,8 +437,8 @@ function Hero() {
             lineHeight: 1.9, marginBottom: 40,
             fontWeight: 300, fontSize: 15,
           }}>
-            Building agentic AI pipelines and no-dev workflows at Cialfo —
-            enabling non-engineers to ship production code independently.
+            Building agentic AI pipelines at Cialfo —
+            multiplying team output by enabling PMs and designers to prototype and ship, without compromising code quality.
           </p>
 
           <div className="hero-buttons">
@@ -526,7 +526,7 @@ function About() {
   const [hovered, setHovered] = useState(false)
 
   return (
-    <section id="about" style={{ paddingTop: 80, paddingBottom: 88, borderTop: '1px solid #1e293b' }}>
+    <section id="about" style={{ paddingTop: 48, paddingBottom: 48, borderTop: '1px solid #1e293b' }}>
       <SectionLabel label="ABOUT" color={P.emerald} />
       <div
         onMouseEnter={() => setHovered(true)}
@@ -546,22 +546,17 @@ function About() {
         <p style={{ color: P.textSec, marginBottom: 18, fontWeight: 300, lineHeight: 1.9, fontSize: 15 }}>
           I'm a Senior Software Engineer at{' '}
           <span style={{ color: P.textPri, fontWeight: 500 }}>Cialfo</span> — a Series B
-          EdTech SaaS platform serving 310,000+ students and 1,000+ universities across 105+
-          countries. I bring 5 years of frontend engineering experience to building systems
-          that push what's possible without a traditional dev workflow.
+          EdTech SaaS platform ($77M raised) serving 310,000+ students and 1,000+ universities
+          across 105+ countries. I bring 5 years of frontend engineering experience to building
+          systems that push what's possible without a traditional dev workflow.
         </p>
-        <p style={{ color: P.textSec, marginBottom: 18, fontWeight: 300, lineHeight: 1.9, fontSize: 15 }}>
+        <p style={{ color: P.textSec, fontWeight: 300, lineHeight: 1.9, fontSize: 15 }}>
           My current focus is on{' '}
           <span style={{ color: P.emerald, fontWeight: 500 }}>agentic AI pipelines</span> —
           architecting Claude-powered systems that allow PMs, designers, and other
           non-engineers to independently generate and ship production-ready code. I've also
           built multi-brand AI chatbots on Cloudflare Workers with RAG and driven meaningful
           performance improvements across the platform.
-        </p>
-        <p style={{ color: P.textSec, fontWeight: 300, lineHeight: 1.9, fontSize: 15 }}>
-          I care about the craft: clean architecture, measurable outcomes, and making complex
-          systems feel simple. If you want to talk about agentic workflows, no-dev platforms,
-          or anything in between — I'm right below.
         </p>
       </div>
     </section>
@@ -572,7 +567,7 @@ function About() {
 
 function ExperienceSection() {
   return (
-    <section id="experience" style={{ paddingTop: 80, paddingBottom: 88, borderTop: '1px solid #1e293b' }}>
+    <section id="experience" style={{ paddingTop: 48, paddingBottom: 48, borderTop: '1px solid #1e293b' }}>
       <SectionLabel label="EXPERIENCE" color={P.blue} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {EXPERIENCE.map((exp, i) => <ExpCard key={i} exp={exp} />)}
@@ -641,7 +636,7 @@ function ExpCard({ exp }) {
 
 function SkillsSection() {
   return (
-    <section id="skills" style={{ paddingTop: 80, paddingBottom: 88, borderTop: '1px solid #1e293b' }}>
+    <section id="skills" style={{ paddingTop: 48, paddingBottom: 48, borderTop: '1px solid #1e293b' }}>
       <SectionLabel label="SKILLS" color={P.purple} />
       <div className="skills-grid">
         {SKILLS.map((cat, i) => <SkillCard key={i} cat={cat} />)}
@@ -778,26 +773,16 @@ function ChatSection() {
   const showSuggestions = messages.length === 0 && !loading && !isTyping
 
   return (
-    <section id="chat" style={{ paddingTop: 80, paddingBottom: 88, borderTop: '1px solid #1e293b' }}>
+    <section id="chat" style={{ paddingTop: 48, paddingBottom: 48, borderTop: '1px solid #1e293b' }}>
       <SectionLabel label="ASK ME ANYTHING" color={P.orange} />
 
-      {/* Intro card */}
-      <div style={{
-        background: P.surface,
-        border: `1px solid ${P.orange}40`,
-        borderRadius: 14,
-        padding: '28px 34px',
-        marginBottom: 28,
-        boxShadow: '0 0 32px #fb923c10',
-      }}>
-        <div style={{ color: P.textPri, fontWeight: 600, fontSize: 18, marginBottom: 8 }}>
-          Chat with me directly
+      <div style={{ marginBottom: 20 }}>
+        <div className="mono" style={{ fontSize: 11, color: '#1e4a2e', marginBottom: 6, letterSpacing: '0.05em' }}>
+          vaibhav@portfolio:~$ ./ask-me.sh
         </div>
-        <p style={{ color: P.textMuted, fontSize: 14, lineHeight: 1.75, fontWeight: 300 }}>
-          This AI knows my background and responds as me in first person. Ask about my
-          experience, what I'm building at Cialfo, my tech stack, or how I approach
-          engineering problems.
-        </p>
+        <div className="mono" style={{ fontSize: 11, color: '#1e4a2e' }}>
+          Groq-powered · responds as me · first person · no fluff
+        </div>
       </div>
 
       {showSuggestions && (
@@ -822,8 +807,10 @@ function ChatSection() {
         marginBottom: 12,
       }}>
         {messages.length === 0 && !loading && !isTyping && (
-          <div style={{ margin: 'auto', textAlign: 'center', color: P.textMuted, fontSize: 14, fontWeight: 300 }}>
-            Pick a suggestion above or type your own question.
+          <div style={{ margin: 'auto', textAlign: 'center' }}>
+            <span className="mono" style={{ color: P.textMuted, fontSize: 13 }}>
+              ask me anything<span className="blink">_</span>
+            </span>
           </div>
         )}
 
