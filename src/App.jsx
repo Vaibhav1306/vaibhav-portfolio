@@ -30,7 +30,7 @@ const GLOBAL_CSS = `
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 
 body {
   font-family: 'Inter', sans-serif;
@@ -39,6 +39,7 @@ body {
   font-size: 15px;
   line-height: 1.8;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 ::-webkit-scrollbar { width: 3px; }
@@ -186,21 +187,34 @@ input::placeholder { color: #475569; }
   box-shadow: 0 0 8px #34d39988;
 }
 
+/* ── iPad Pro / large tablet landscape (1024px and below) ── */
+@media (max-width: 1024px) {
+  .hero-layout { gap: 44px; }
+  .hero-name { font-size: 56px; }
+  .hero-photo-wrap { width: 240px; height: 295px; }
+}
+
+/* ── iPad portrait / tablet (768px and below) ── */
 @media (max-width: 768px) {
   .hero-layout { flex-direction: column-reverse; gap: 36px; align-items: center; }
   .hero-text { text-align: center; }
-  .hero-photo-wrap { width: 210px; height: 256px; }
+  .hero-name { font-size: 52px; }
+  .hero-photo-wrap { width: 200px; height: 244px; }
   .hero-buttons { justify-content: center; }
+  /* clip glow so it doesn't overflow the viewport */
+  .hero-photo-col::before { inset: -20px; }
 }
 
+/* ── Mobile (600px and below) ── */
 @media (max-width: 600px) {
   .nav-links { display: none; }
-  .hero-name { font-size: 44px; }
-  .hero-buttons { flex-direction: column; align-items: stretch; width: 100%; max-width: 300px; margin: 0 auto; }
+  .hero-name { font-size: 42px; }
+  .hero-photo-wrap { width: 176px; height: 214px; }
+  .hero-buttons { flex-direction: column; align-items: stretch; width: 100%; max-width: 280px; margin: 0 auto; }
   .hero-buttons a, .hero-buttons button { width: 100%; }
-  .hero-buttons button { width: 100%; }
   .exp-header { flex-direction: column; align-items: flex-start; }
   .footer-inner { flex-direction: column; text-align: center; gap: 18px; }
+  .footer-links { flex-wrap: wrap; justify-content: center; }
 }
 `
 
@@ -1034,7 +1048,7 @@ export default function App() {
     <>
       <style>{GLOBAL_CSS}</style>
       <Nav active={active} />
-      <main style={{ maxWidth: 880, margin: '0 auto', padding: '0 28px' }}>
+      <main style={{ maxWidth: 880, margin: '0 auto', padding: '0 clamp(16px, 4vw, 28px)' }}>
         <Hero />
         <About />
         <ExperienceSection />
