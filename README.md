@@ -1,5 +1,7 @@
 # Vaibhav Shrivastava — Portfolio
 
+Live at **[vaibhavs-dev.vercel.app](https://vaibhavs-dev.vercel.app)**
+
 Personal portfolio site built with React 18 + Vite. Features a dark blue-slate design with gradient accents, a two-column hero with profile photo, and an AI chat powered by Groq that responds as Vaibhav in first person.
 
 ## Tech Stack
