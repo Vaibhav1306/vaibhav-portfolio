@@ -310,7 +310,7 @@ const SKILLS = [
   {
     category: 'Testing & Analytics',
     color: P.orange,
-    items: ['Jasmine', 'Karma', 'Unit Testing (91%+)', 'Segment Analytics'],
+    items: ['Jasmine', 'Karma', 'Jest', 'Unit Testing (91%+)', 'Segment Analytics'],
   },
 ]
 
