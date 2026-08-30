@@ -7,7 +7,7 @@ Personal portfolio site built with React 18 + Vite. Features a dark blue-slate d
 ## Tech Stack
 
 - **React 18 + Vite** — single page app, zero CSS frameworks
-- **Groq API** — llama-3.3-70b-versatile for the AI chat
+- **Groq API** — openai/gpt-oss-120b for the AI chat
 - **Vercel** — hosting
 
 ## Local Setup

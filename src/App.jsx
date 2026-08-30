@@ -740,10 +740,12 @@ function ChatSection() {
           'Authorization': `Bearer ${GROQ_KEY}`,
         },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
+          model: 'openai/gpt-oss-120b',
           messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...newHistory],
-          max_tokens: 300,
+          max_tokens: 800,
           temperature: 0.75,
+          reasoning_effort: 'low',
+          include_reasoning: false,
         }),
       })
 
