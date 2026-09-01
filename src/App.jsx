@@ -489,6 +489,23 @@ function Hero() {
               </button>
             </a>
 
+            <a
+              href="/Vaibhav_Shrivastava_Resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <button style={{
+                background: '#34d39914',
+                color: P.emerald,
+                border: `1px solid ${P.emerald}60`, padding: '12px 26px',
+                fontSize: 14, fontWeight: 500,
+                borderRadius: 8,
+                transition: 'all 0.2s',
+              }}>
+                Résumé
+              </button>
+            </a>
+
             <button
               onClick={() => scrollToSection('chat')}
               style={{
