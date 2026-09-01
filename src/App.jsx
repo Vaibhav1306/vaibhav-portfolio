@@ -286,6 +286,51 @@ input::placeholder { color: #475569; }
   .footer-inner { flex-direction: column; text-align: center; gap: 18px; }
   .footer-links { flex-wrap: wrap; justify-content: center; }
 }
+
+/* ── bento grid ─────────────────────────────────────────────────────────────── */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 14px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 92px clamp(16px, 4vw, 28px) 48px;
+  grid-auto-rows: minmax(10px, auto);
+  grid-template-areas:
+    "hero hero hero hero hero hero hero st1 st1 st1 st2 st2"
+    "hero hero hero hero hero hero hero agent agent agent agent agent"
+    "chat chat chat chat chat chat chat skills skills skills skills skills"
+    "chat chat chat chat chat chat chat skills skills skills skills skills"
+    "about about about about eval eval eval eval code code code code"
+    "time time time time time time time time time time time time";
+}
+.tile {
+  position: relative;
+  background: #121a2c;
+  border: 1px solid #24314a;
+  border-radius: 18px;
+  padding: 22px 24px;
+  overflow: hidden;
+  min-width: 0;
+  transition: transform .3s cubic-bezier(.2,.7,.3,1), border-color .3s ease, box-shadow .3s ease, opacity .6s ease;
+}
+.tile:hover { transform: translateY(-4px); border-color: #34d39944; box-shadow: 0 18px 44px -18px #34d39933; }
+.tile .hero-layout { gap: 26px; }
+.tile .hero-name { font-size: 46px; }
+.tile .hero-photo-wrap { width: 188px; height: 232px; }
+.tile .hero-photo-col::before { inset: -30px; }
+@media (max-width: 900px) {
+  .tile .hero-name { font-size: 44px; }
+  .tile .hero-photo-wrap { width: 200px; height: 244px; }
+}
+.tile-accent::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--accent, #34d399); opacity: .9;
+}
+@media (max-width: 900px) {
+  .bento { grid-template-columns: 1fr; grid-template-areas: none; padding-top: 84px; }
+  .tile { grid-area: auto !important; }
+}
 `
 
 // ─── PALETTE ──────────────────────────────────────────────────────────────────
@@ -954,15 +999,13 @@ function ChatSection() {
   const showSuggestions = messages.length === 0 && !loading && !isTyping
 
   return (
-    <section id="chat" className="reveal" style={{ paddingTop: 48, paddingBottom: 48, borderTop: '1px solid #1e293b' }}>
-      <SectionLabel label="ASK ME ANYTHING" color={P.orange} />
-
-      <div style={{ marginBottom: 20 }}>
-        <div className="mono" style={{ fontSize: 11, color: '#1e4a2e', marginBottom: 6, letterSpacing: '0.05em' }}>
-          vaibhav@portfolio:~$ ./ask-me.sh
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10, marginBottom: 14 }}>
+        <div className="mono" style={{ fontSize: 11, color: P.orange, letterSpacing: '0.16em', fontWeight: 600 }}>
+          ──── ASK ME ANYTHING
         </div>
-        <div className="mono" style={{ fontSize: 11, color: '#1e4a2e' }}>
-          Groq-powered · responds as me · first person · no fluff
+        <div className="mono" style={{ fontSize: 10, color: P.textMuted }}>
+          Groq · voice-enabled
         </div>
       </div>
 
@@ -978,8 +1021,9 @@ function ChatSection() {
         background: P.surface,
         border: `1px solid ${P.border}`,
         borderRadius: 14,
-        minHeight: 180,
-        maxHeight: 360,
+        flex: 1,
+        minHeight: 200,
+        maxHeight: 420,
         overflowY: 'auto',
         padding: 20,
         display: 'flex',
@@ -1047,7 +1091,7 @@ function ChatSection() {
         voiceOn={voiceOn}
         onToggleVoice={toggleVoice}
       />
-    </section>
+    </div>
   )
 }
 
@@ -1240,6 +1284,150 @@ function Footer() {
 
 // ─── APP ──────────────────────────────────────────────────────────────────────
 
+// ─── BENTO TILES ──────────────────────────────────────────────────────────────
+
+function Tile({ area, id, accent, reveal, hero, children }) {
+  const style = { gridArea: area }
+  if (accent) style['--accent'] = accent
+  if (hero) style.padding = '30px 32px'
+  return (
+    <div
+      id={id}
+      className={`tile${accent ? ' tile-accent' : ''}${reveal ? ' reveal' : ''}`}
+      style={style}
+    >
+      {children}
+    </div>
+  )
+}
+
+function HeroTile() {
+  return (
+    <Tile area="hero" id="hero" hero>
+      <div className="hero-layout">
+        <div className="hero-text" style={{ flex: 1, minWidth: 0 }}>
+          <div className="mono" style={{ color: P.emerald, fontSize: 12, marginBottom: 18, opacity: 0.65, letterSpacing: '0.1em' }}>
+            ▶ vaibhav@portfolio:~$ whoami
+          </div>
+          <h1>
+            <div className="hero-name" style={{ color: P.textPri, marginBottom: 4 }}>Vaibhav</div>
+            <div className="hero-name gradient-text" style={{ marginBottom: 16 }}>Shrivastava</div>
+          </h1>
+          <div style={{ color: P.textSec, fontSize: 15, marginBottom: 12, fontWeight: 400 }}>
+            Software Engineering Lead &nbsp;·&nbsp; Noida, India &nbsp;·&nbsp; 5+ yrs exp
+          </div>
+          <p style={{ color: P.textMuted, lineHeight: 1.8, marginBottom: 26, fontWeight: 300, fontSize: 14.5 }}>
+            Leading UI and agentic AI work at Cialfo — multiplying team output by enabling PMs and designers to prototype and ship, without compromising code quality.
+          </p>
+          <div className="hero-buttons">
+            <a href="mailto:vshrivastava103@gmail.com">
+              <button className="btn-anim" style={{ background: 'linear-gradient(100deg, #34d399, #60a5fa)', color: '#071a12', border: 'none', padding: '11px 22px', fontSize: 14, fontWeight: 600, borderRadius: 8, boxShadow: '0 0 16px #34d39920' }}>Get in touch</button>
+            </a>
+            <a href="https://www.linkedin.com/in/vaibhav-shrivastava-aa637116a/" target="_blank" rel="noopener noreferrer">
+              <button className="btn-anim" style={{ background: '#60a5fa14', color: P.blue, border: `1px solid ${P.blue}60`, padding: '11px 22px', fontSize: 14, fontWeight: 500, borderRadius: 8 }}>LinkedIn</button>
+            </a>
+            <a href="/Vaibhav_Shrivastava_Resume.pdf" target="_blank" rel="noopener noreferrer">
+              <button className="btn-anim" style={{ background: '#34d39914', color: P.emerald, border: `1px solid ${P.emerald}60`, padding: '11px 22px', fontSize: 14, fontWeight: 500, borderRadius: 8 }}>Résumé</button>
+            </a>
+            <button className="btn-anim" onClick={() => scrollToSection('chat')} style={{ background: '#c084fc14', color: P.purple, border: `1px solid ${P.purple}60`, padding: '11px 22px', fontSize: 14, fontWeight: 500, borderRadius: 8 }}>Ask me anything</button>
+          </div>
+        </div>
+        <div className="hero-photo-col">
+          <div className="hero-photo-wrap">
+            <div className="hero-photo-inner">
+              <img src="/avatar.png" alt="Vaibhav Shrivastava" />
+              <div className="hero-photo-tint" />
+              <div className="hero-photo-fade" />
+              <div className="hero-badge"><span className="hero-badge-dot pulse-dot" />Agentic AI · Frontend</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Tile>
+  )
+}
+
+function StatTile({ area, value, label, sub, accent }) {
+  return (
+    <Tile area={area} accent={accent} reveal>
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
+        <div style={{ fontSize: 42, fontWeight: 700, color: accent, lineHeight: 1, letterSpacing: '-0.02em' }}>{value}</div>
+        <div style={{ color: P.textSec, fontSize: 13, marginTop: 10, fontWeight: 500 }}>{label}</div>
+        {sub && <div className="mono" style={{ color: P.textMuted, fontSize: 11, marginTop: 4 }}>{sub}</div>}
+      </div>
+    </Tile>
+  )
+}
+
+function WorkTile({ area, tag, title, body, accent }) {
+  return (
+    <Tile area={area} accent={accent} reveal>
+      <div className="mono" style={{ fontSize: 10, letterSpacing: '0.14em', color: accent, fontWeight: 600, marginBottom: 12 }}>{tag}</div>
+      <div style={{ color: P.textPri, fontSize: 16, fontWeight: 600, marginBottom: 8 }}>{title}</div>
+      <p style={{ color: P.textMuted, fontSize: 13.5, lineHeight: 1.7, fontWeight: 300 }}>{body}</p>
+    </Tile>
+  )
+}
+
+function ChatTile() {
+  return (
+    <Tile area="chat" id="chat" accent={P.orange} reveal>
+      <ChatSection />
+    </Tile>
+  )
+}
+
+function AboutTile() {
+  return (
+    <Tile area="about" id="about" accent={P.emerald} reveal>
+      <div className="mono" style={{ fontSize: 10, letterSpacing: '0.16em', color: P.emerald, fontWeight: 600, marginBottom: 12 }}>ABOUT</div>
+      <p style={{ color: P.textSec, fontSize: 13.5, lineHeight: 1.75, fontWeight: 300 }}>
+        Software Engineering Lead at <span style={{ color: P.textPri, fontWeight: 500 }}>Cialfo</span> — a Series B EdTech SaaS ($77M raised) serving 310,000+ students and 1,000+ universities across 105+ countries. I own the UI codebase and drive the company's AI-front work, building systems that let non-engineers ship production code.
+      </p>
+    </Tile>
+  )
+}
+
+function SkillsTile() {
+  return (
+    <Tile area="skills" id="skills" accent={P.purple} reveal>
+      <div className="mono" style={{ fontSize: 10, letterSpacing: '0.16em', color: P.purple, fontWeight: 600, marginBottom: 16 }}>SKILLS</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
+        {SKILLS.map((cat, i) => (
+          <div key={i}>
+            <div className="mono" style={{ fontSize: 9.5, letterSpacing: '0.12em', color: cat.color, marginBottom: 7, fontWeight: 600 }}># {cat.category.toUpperCase()}</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {cat.items.map((it, j) => (
+                <span key={j} className="skill-tag" style={{ display: 'inline-block', background: `${cat.color}12`, border: `1px solid ${cat.color}30`, borderRadius: 6, padding: '3px 9px', fontSize: 11.5, color: cat.color }}>{it}</span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </Tile>
+  )
+}
+
+function TimelineTile() {
+  return (
+    <Tile area="time" id="experience" accent={P.blue} reveal>
+      <div className="mono" style={{ fontSize: 10, letterSpacing: '0.16em', color: P.blue, fontWeight: 600, marginBottom: 16 }}>EXPERIENCE</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}>
+        {EXPERIENCE.map((exp, i) => (
+          <div key={i} style={{ flex: '1 1 175px', minWidth: 150, borderLeft: `2px solid ${exp.color}`, paddingLeft: 12 }}>
+            {exp.current && (
+              <span className="mono" style={{ fontSize: 9, color: exp.color, letterSpacing: '0.08em', fontWeight: 600 }}>● CURRENT</span>
+            )}
+            <div style={{ color: exp.color, fontSize: 12.5, fontWeight: 600, marginTop: exp.current ? 3 : 0 }}>{exp.role}</div>
+            <div style={{ color: P.textSec, fontSize: 12.5, fontWeight: 500 }}>{exp.company}</div>
+            <div className="mono" style={{ color: P.textMuted, fontSize: 10.5, marginTop: 2 }}>{exp.period}</div>
+          </div>
+        ))}
+      </div>
+    </Tile>
+  )
+}
+
 export default function App() {
   const [active, setActive] = useState('hero')
 
@@ -1273,12 +1461,17 @@ export default function App() {
     <>
       <style>{GLOBAL_CSS}</style>
       <Nav active={active} />
-      <main style={{ maxWidth: 880, margin: '0 auto', padding: '0 clamp(16px, 4vw, 28px)' }}>
-        <Hero />
-        <About />
-        <ExperienceSection />
-        <SkillsSection />
-        <ChatSection />
+      <main className="bento">
+        <HeroTile />
+        <StatTile area="st1" accent={P.emerald} value="~75%" label="Delivery velocity gain" sub="days → hours" />
+        <StatTile area="st2" accent={P.blue} value="100%" label="Eval pass rate" sub="130 questions" />
+        <WorkTile area="agent" accent={P.emerald} tag="SIGNATURE WORK" title="Agentic AI pipelines" body="Claude-powered pipelines that let PMs & designers ship production-ready code independently — the core of Cialfo's no-dev workflow platform." />
+        <ChatTile />
+        <SkillsTile />
+        <AboutTile />
+        <WorkTile area="eval" accent={P.purple} tag="QUALITY ENGINE" title="130-question eval framework" body="An automated Claude Code suite that tests the UI, agentic & API repos against 130 questions plus follow-ups, auto-fixing until a 100% pass rate." />
+        <WorkTile area="code" accent={P.blue} tag="AUTOMATION" title="Code review on autopilot" body="Claude routines review every change and surface issues automatically — no manual kickoff." />
+        <TimelineTile />
       </main>
       <Footer />
     </>
