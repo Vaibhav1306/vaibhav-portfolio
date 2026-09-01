@@ -144,9 +144,11 @@ input::placeholder { color: #6f6455; }
 .avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: center 18%; display: block; }
 
 /* stage — centered conversation */
-.stage { position: relative; z-index: 1; max-width: 820px; margin: 0 auto; padding: 92px clamp(16px,4vw,28px) 150px; min-height: 100vh; }
+.stage { position: relative; z-index: 1; max-width: 820px; margin: 0 auto; height: 100dvh; display: flex; flex-direction: column; padding: 60px clamp(16px,4vw,28px) 0; }
+.scroll { flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; padding: 26px 4px 14px; scroll-behavior: smooth; }
+.scroll::-webkit-scrollbar { width: 7px; }
 
-.hero-id { text-align: center; margin-bottom: 30px; display: flex; flex-direction: column; align-items: center; }
+.hero-id { text-align: center; margin-bottom: 26px; display: flex; flex-direction: column; align-items: center; }
 .hero-name { font-size: 46px; font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; }
 
 .msg-card {
@@ -156,13 +158,9 @@ input::placeholder { color: #6f6455; }
 }
 .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 
-/* dock — sticky input + explore */
-.dock {
-  position: sticky; bottom: 0; z-index: 20; margin: 0 auto;
-  padding-top: 14px; padding-bottom: 16px;
-  background: linear-gradient(180deg, rgba(23,18,14,0) 0%, rgba(23,18,14,0.85) 30%, #17120e 72%);
-}
-.dock-inner { display: flex; flex-direction: column; gap: 11px; }
+/* dock — input + topics, pinned below the scroll area (never overlaps messages) */
+.dock { flex: 0 0 auto; z-index: 20; padding: 12px 0 16px; background: #17120e; border-top: 1px solid rgba(255,224,190,0.08); }
+.dock-inner { display: flex; flex-direction: column; gap: 10px; }
 .dock-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 
 @media (max-width: 640px) {
@@ -391,7 +389,7 @@ function ChatInput({ input, setInput, onSend, onKey, disabled, micSupported, lis
         onBlur={() => setFocused(false)}
         placeholder={listening ? 'Listening… speak now' : (micSupported ? 'Ask me anything, or tap the mic…' : 'Ask me anything…')}
         disabled={disabled}
-        style={{ flex: 1, background: 'none', border: 'none', outline: 'none', fontSize: 14.5, color: P.textPri, paddingLeft: 8 }}
+        style={{ flex: 1, minWidth: 0, background: 'none', border: 'none', outline: 'none', fontSize: 14.5, color: P.textPri, paddingLeft: 8 }}
       />
       {ttsSupported && (
         <button onClick={onToggleVoice} title={voiceOn ? 'Voice replies: on' : 'Voice replies: off'} aria-label="Toggle voice replies" style={iconBtn(voiceOn, P.copper)}>
@@ -423,6 +421,7 @@ export default function App() {
   const [typingText, setTypingText] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const endRef = useRef(null)
+  const scrollRef = useRef(null)
   const nextId = useRef(0)
 
   const [listening, setListening] = useState(false)
@@ -525,7 +524,8 @@ export default function App() {
 
   useEffect(() => {
     if (!started) return
-    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    const el = scrollRef.current
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
   }, [messages, typingText, loading, isTyping, started])
 
   const animateTyping = useCallback((text, onDone) => {
@@ -600,42 +600,51 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <Nav />
       <main className="stage">
-        {/* identity */}
-        <div className="hero-id stagger">
-          <div className="avatar"><img src="/avatar.png" alt="Vaibhav Shrivastava" /></div>
-          <div style={{ marginTop: 18, fontSize: 10.5, letterSpacing: '.18em', fontWeight: 600, textTransform: 'uppercase', color: P.amber }}>Software Engineering Lead · Cialfo</div>
-          <h1 className="display hero-name" style={{ marginTop: 12 }}>
-            Hi, I'm <span className="gradient-text">Vaibhav</span>
-          </h1>
-          <p style={{ color: P.textMuted, fontSize: 15, fontWeight: 300, marginTop: 14, maxWidth: 480, lineHeight: 1.7 }}>
-            I lead UI and agentic AI at Cialfo. Instead of scrolling a résumé — just ask me anything, by text or voice. Or tap a topic to explore.
-          </p>
+        <div className="scroll" ref={scrollRef} style={!started ? { display: 'flex', flexDirection: 'column', justifyContent: 'center' } : undefined}>
+          {/* identity */}
+          <div className="hero-id stagger">
+            <div className="avatar"><img src="/avatar.png" alt="Vaibhav Shrivastava" /></div>
+            <div style={{ marginTop: 18, fontSize: 10.5, letterSpacing: '.18em', fontWeight: 600, textTransform: 'uppercase', color: P.amber }}>Software Engineering Lead · Cialfo</div>
+            <h1 className="display hero-name" style={{ marginTop: 12 }}>
+              Hi, I'm <span className="gradient-text">Vaibhav</span>
+            </h1>
+            <p style={{ color: P.textMuted, fontSize: 15, fontWeight: 300, marginTop: 14, maxWidth: 480, lineHeight: 1.7 }}>
+              I lead UI and agentic AI at Cialfo. Instead of scrolling a résumé — just ask me anything, by text or voice. Or tap a topic to explore.
+            </p>
+            {!started && (
+              <div className="dock-chips" style={{ marginTop: 22 }}>
+                {SUGGESTED_PROMPTS.map((p, i) => (
+                  <button key={i} className="chip" onClick={() => sendMessage(p)}>{p}</button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* conversation stream */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {messages.map(msg => {
+              if (msg.role === 'user') return <UserBubble key={msg.id} content={msg.content} />
+              if (msg.role === 'card') { const C = CARDS[msg.kind]; return C ? <C key={msg.id} /> : null }
+              return <AiBubble key={msg.id} content={msg.content} />
+            })}
+
+            {loading && (
+              <div className="msg-in" style={{ alignSelf: 'flex-start', display: 'flex', gap: 10 }}>
+                <VAvatar />
+                <div style={{ background: P.aiBg, border: `1px solid ${P.border}`, borderRadius: '4px 14px 14px 14px', padding: '11px 16px', color: P.textMuted, fontSize: 14 }}>thinking<span className="blink">_</span></div>
+              </div>
+            )}
+            {isTyping && typingText && (
+              <div className="msg-in" style={{ alignSelf: 'flex-start', maxWidth: '84%', display: 'flex', gap: 10 }}>
+                <VAvatar />
+                <div style={{ background: P.aiBg, border: `1px solid ${P.border}`, borderRadius: '4px 14px 14px 14px', padding: '11px 16px', color: P.textSec, fontSize: 14, lineHeight: 1.75, fontWeight: 300 }}>{typingText}<span className="blink" style={{ fontSize: 12 }}>_</span></div>
+              </div>
+            )}
+            <div ref={endRef} />
+          </div>
         </div>
 
-        {/* conversation stream */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 10 }}>
-          {messages.map(msg => {
-            if (msg.role === 'user') return <UserBubble key={msg.id} content={msg.content} />
-            if (msg.role === 'card') { const C = CARDS[msg.kind]; return C ? <C key={msg.id} /> : null }
-            return <AiBubble key={msg.id} content={msg.content} />
-          })}
-
-          {loading && (
-            <div className="msg-in" style={{ alignSelf: 'flex-start', display: 'flex', gap: 10 }}>
-              <VAvatar />
-              <div style={{ background: P.aiBg, border: `1px solid ${P.border}`, borderRadius: '4px 14px 14px 14px', padding: '11px 16px', color: P.textMuted, fontSize: 14 }}>thinking<span className="blink">_</span></div>
-            </div>
-          )}
-          {isTyping && typingText && (
-            <div className="msg-in" style={{ alignSelf: 'flex-start', maxWidth: '84%', display: 'flex', gap: 10 }}>
-              <VAvatar />
-              <div style={{ background: P.aiBg, border: `1px solid ${P.border}`, borderRadius: '4px 14px 14px 14px', padding: '11px 16px', color: P.textSec, fontSize: 14, lineHeight: 1.75, fontWeight: 300 }}>{typingText}<span className="blink" style={{ fontSize: 12 }}>_</span></div>
-            </div>
-          )}
-          <div ref={endRef} />
-        </div>
-
-        {/* dock: topics + input, always reachable */}
+        {/* dock: topics + input, pinned below the scroll area */}
         <div className="dock">
           <div className="dock-inner">
             <div className="dock-chips">
@@ -643,13 +652,6 @@ export default function App() {
                 <button key={t.key} className="chip chip-accent" onClick={() => revealTopic(t.key)}>{t.label}</button>
               ))}
             </div>
-            {!started && (
-              <div className="dock-chips">
-                {SUGGESTED_PROMPTS.map((p, i) => (
-                  <button key={i} className="chip" onClick={() => sendMessage(p)}>{p}</button>
-                ))}
-              </div>
-            )}
             <ChatInput
               input={input} setInput={setInput}
               onSend={() => sendMessage(input)} onKey={handleKey}
