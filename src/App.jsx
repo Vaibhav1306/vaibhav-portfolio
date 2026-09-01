@@ -144,9 +144,9 @@ input::placeholder { color: #6f6455; }
 .avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: center 18%; display: block; }
 
 /* stage — centered conversation */
-.stage { position: relative; z-index: 1; max-width: 820px; margin: 0 auto; height: 100dvh; display: flex; flex-direction: column; padding: 60px clamp(16px,4vw,28px) 0; }
-.scroll { flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; padding: 26px 4px 14px; scroll-behavior: smooth; }
-.scroll::-webkit-scrollbar { width: 7px; }
+.stage { position: relative; z-index: 1; height: 100dvh; display: flex; flex-direction: column; padding-top: 60px; }
+.scroll { flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; }
+.scroll-inner { max-width: 820px; margin: 0 auto; padding: 26px clamp(16px,4vw,28px) 14px; }
 
 .hero-id { text-align: center; margin-bottom: 26px; display: flex; flex-direction: column; align-items: center; }
 .hero-name { font-size: 46px; font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; }
@@ -159,8 +159,8 @@ input::placeholder { color: #6f6455; }
 .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 
 /* dock — input + topics, pinned below the scroll area (never overlaps messages) */
-.dock { flex: 0 0 auto; z-index: 20; padding: 12px 0 16px; background: #17120e; border-top: 1px solid rgba(255,224,190,0.08); }
-.dock-inner { display: flex; flex-direction: column; gap: 10px; }
+.dock { flex: 0 0 auto; z-index: 20; background: #17120e; border-top: 1px solid rgba(255,224,190,0.08); }
+.dock-inner { max-width: 820px; margin: 0 auto; padding: 12px clamp(16px,4vw,28px) 16px; display: flex; flex-direction: column; gap: 10px; }
 .dock-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 
 @media (max-width: 640px) {
@@ -681,6 +681,7 @@ export default function App() {
       <Nav />
       <main className="stage">
         <div className="scroll" ref={scrollRef} style={!started ? { display: 'flex', flexDirection: 'column', justifyContent: 'center' } : undefined}>
+          <div className="scroll-inner">
           {/* identity */}
           <div className="hero-id stagger">
             <div className="avatar"><img src="/avatar.png" alt="Vaibhav Shrivastava" /></div>
@@ -721,6 +722,7 @@ export default function App() {
               </div>
             )}
             <div ref={endRef} />
+          </div>
           </div>
         </div>
 
