@@ -429,17 +429,43 @@ export default function App() {
   const [voiceOn, setVoiceOn] = useState(false)
   const voiceOnRef = useRef(false)
   const recognitionRef = useRef(null)
+  const voiceRef = useRef(null)
   const micSupported = typeof window !== 'undefined' && !!(window.SpeechRecognition || window.webkitSpeechRecognition)
   const ttsSupported = typeof window !== 'undefined' && 'speechSynthesis' in window
 
   const started = messages.length > 0 || loading || isTyping
+
+  // pick the most natural Indian-English male voice available on the viewer's device
+  useEffect(() => {
+    if (!('speechSynthesis' in window)) return
+    const pick = () => {
+      const voices = window.speechSynthesis.getVoices()
+      if (!voices.length) return
+      const has = (v, ...kw) => kw.some(k => (v.name || '').toLowerCase().includes(k))
+      const inIN = voices.filter(v => v.lang === 'en-IN' || v.lang === 'hi-IN')
+      const enNatural = voices.filter(v => (v.lang || '').startsWith('en') && has(v, 'natural', 'online'))
+      voiceRef.current =
+        voices.find(v => v.lang === 'en-IN' && has(v, 'prabhat', 'ravi', 'madhur')) ||
+        voices.find(v => has(v, 'prabhat', 'ravi', 'madhur')) ||
+        inIN.find(v => has(v, 'natural', 'online')) ||
+        inIN.find(v => v.lang === 'en-IN') ||
+        (enNatural.find(v => has(v, 'male')) || enNatural[0]) ||
+        voices.find(v => (v.lang || '').startsWith('en')) ||
+        voices[0] || null
+    }
+    pick()
+    window.speechSynthesis.onvoiceschanged = pick
+    return () => { try { window.speechSynthesis.onvoiceschanged = null } catch { /* ignore */ } }
+  }, [])
 
   const speakText = useCallback((text) => {
     if (!voiceOnRef.current || !('speechSynthesis' in window)) return
     try {
       window.speechSynthesis.cancel()
       const u = new SpeechSynthesisUtterance(text)
-      u.rate = 1.03; u.pitch = 1; u.lang = 'en-US'
+      if (voiceRef.current) { u.voice = voiceRef.current; u.lang = voiceRef.current.lang || 'en-IN' }
+      else u.lang = 'en-IN'
+      u.rate = 0.98; u.pitch = 1
       window.speechSynthesis.speak(u)
     } catch { /* ignore */ }
   }, [])
