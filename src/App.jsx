@@ -430,6 +430,7 @@ export default function App() {
   const voiceOnRef = useRef(false)
   const recognitionRef = useRef(null)
   const voiceRef = useRef(null)
+  const audioRef = useRef(null)
   const micSupported = typeof window !== 'undefined' && !!(window.SpeechRecognition || window.webkitSpeechRecognition)
   const ttsSupported = typeof window !== 'undefined' && 'speechSynthesis' in window
 
@@ -458,8 +459,14 @@ export default function App() {
     return () => { try { window.speechSynthesis.onvoiceschanged = null } catch { /* ignore */ } }
   }, [])
 
-  const speakText = useCallback((text) => {
-    if (!voiceOnRef.current || !('speechSynthesis' in window)) return
+  const stopSpeaking = useCallback(() => {
+    try { if (audioRef.current) { audioRef.current.pause(); audioRef.current = null } } catch { /* ignore */ }
+    if ('speechSynthesis' in window) { try { window.speechSynthesis.cancel() } catch { /* ignore */ } }
+  }, [])
+
+  // device (Web Speech) fallback — synthetic, used only if no neural TTS is configured
+  const deviceSpeak = useCallback((text) => {
+    if (!('speechSynthesis' in window)) return
     try {
       window.speechSynthesis.cancel()
       const u = new SpeechSynthesisUtterance(text)
@@ -470,14 +477,35 @@ export default function App() {
     } catch { /* ignore */ }
   }, [])
 
+  // try the neural voice via our serverless proxy; fall back to the device voice
+  const speakText = useCallback(async (text) => {
+    if (!voiceOnRef.current) return
+    stopSpeaking()
+    try {
+      const r = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) })
+      if (r.ok) {
+        const blob = await r.blob()
+        if (voiceOnRef.current && blob && blob.size > 0 && (blob.type || '').includes('audio')) {
+          const url = URL.createObjectURL(blob)
+          const a = new Audio(url)
+          audioRef.current = a
+          a.onended = () => { URL.revokeObjectURL(url); if (audioRef.current === a) audioRef.current = null }
+          await a.play()
+          return
+        }
+      }
+    } catch { /* fall through to device voice */ }
+    if (voiceOnRef.current) deviceSpeak(text)
+  }, [stopSpeaking, deviceSpeak])
+
   const toggleVoice = useCallback(() => {
     setVoiceOn(v => {
       const next = !v
       voiceOnRef.current = next
-      if (!next && 'speechSynthesis' in window) window.speechSynthesis.cancel()
+      if (!next) stopSpeaking()
       return next
     })
-  }, [])
+  }, [stopSpeaking])
 
   useEffect(() => () => { if ('speechSynthesis' in window) window.speechSynthesis.cancel() }, [])
 
@@ -498,7 +526,7 @@ export default function App() {
 
   const sendMessage = useCallback(async (text) => {
     if (!text.trim() || loading || isTyping) return
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel()
+    stopSpeaking()
 
     setMessages(prev => [...prev, { role: 'user', content: text, id: nextId.current++ }])
     setInput('')
@@ -528,12 +556,12 @@ export default function App() {
       setLoading(false)
       setMessages(prev => [...prev, { role: 'ai', content: 'Network error — try again!', id: nextId.current++ }])
     }
-  }, [history, loading, isTyping, animateTyping, speakText])
+  }, [history, loading, isTyping, animateTyping, speakText, stopSpeaking])
 
   const revealTopic = useCallback((key) => {
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel()
+    stopSpeaking()
     setMessages(prev => [...prev, { role: 'card', kind: key, id: nextId.current++ }])
-  }, [])
+  }, [stopSpeaking])
 
   const handleKey = useCallback((e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input) }
