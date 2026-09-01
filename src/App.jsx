@@ -598,6 +598,8 @@ export default function App() {
       fd.append('model', 'whisper-large-v3-turbo')
       fd.append('response_format', 'json')
       fd.append('language', 'en')
+      fd.append('temperature', '0')
+      fd.append('prompt', 'Conversation with Vaibhav Shrivastava, a Software Engineering Lead at Cialfo (Manifest Global) working on agentic AI, Claude, Claude Code, LangChain, LangGraph, RAG, and UI engineering. Names: Vaibhav, Shrivastava, Cialfo.')
       const r = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
         method: 'POST', headers: { Authorization: `Bearer ${GROQ_KEY}` }, body: fd,
       })
