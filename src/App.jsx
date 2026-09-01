@@ -10,6 +10,7 @@ Key facts:
 - Currently architecting Claude-powered agentic pipelines enabling PMs & designers (3–5 non-engineers) to generate and ship production code independently — ~75% velocity increase, days to hours.
 - Main focus spans the UI and agentic repos: build internal tools and apply them across the UI, and lead the agentic chat experience end-to-end.
 - Built an automated quality framework in Claude Code that tests the UI, agentic, and API repos against 130 benchmark questions plus their follow-ups, then auto-remediates failures until reaching a 100% pass rate.
+- Automated the team's code review using Claude routines (scheduled agents) that review changes and surface issues on every change, without manual kickoff.
 - Proficient in Claude Code skill authoring; own the end-to-end skill library powering the no-dev workflow platform.
 - Built pre-commit hook infrastructure enabling non-developer contributions to production codebases.
 - Delivered multi-brand AI chatbot via Cloudflare Workers + Cloudflare-managed RAG; drove ~30% PLT reduction.
@@ -82,10 +83,38 @@ body {
 
 .pulse-dot { animation: pulseDot 2.2s ease-out infinite; }
 
+/* scroll reveal */
+.reveal { opacity: 0; transform: translateY(32px); transition: opacity .7s cubic-bezier(.2,.7,.3,1), transform .7s cubic-bezier(.2,.7,.3,1); }
+.reveal.in { opacity: 1; transform: none; }
+.reveal-2 { transition-delay: .1s; }
+.reveal-3 { transition-delay: .2s; }
+.reveal-4 { transition-delay: .3s; }
+
+/* animated gradient name (size + animation folded into the base .gradient-text rule below) */
+@keyframes gradientShift { from { background-position: 0% center; } to { background-position: 200% center; } }
+
+/* floating hero photo */
+@keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+.hero-photo-wrap { animation: floaty 6s ease-in-out infinite; }
+
+/* button shine sweep */
+.btn-anim { position: relative; overflow: hidden; }
+.btn-anim::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: -80%; width: 45%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,.35), transparent);
+  transform: skewX(-20deg); pointer-events: none; transition: left .55s ease;
+}
+.btn-anim:hover::after { left: 130%; }
+
+/* mic listening pulse */
+@keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 #fb923c66; } 70% { box-shadow: 0 0 0 9px #fb923c00; } }
+.mic-live { animation: micPulse 1.2s ease-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
-  .hero-text > *, .pulse-dot { animation: none; }
-  .btn-anim, .skill-tag, .link-underline::after { transition: none; }
+  .hero-text > *, .pulse-dot, .gradient-text, .hero-photo-wrap, .mic-live { animation: none; }
+  .btn-anim, .skill-tag, .link-underline::after, .reveal { transition: none; }
   .btn-anim:hover, .skill-tag:hover { transform: none; }
+  .reveal { opacity: 1; transform: none; }
 }
 
 a { text-decoration: none; color: inherit; }
@@ -96,10 +125,12 @@ input::placeholder { color: #475569; }
 .mono { font-family: 'JetBrains Mono', monospace; }
 
 .gradient-text {
-  background: linear-gradient(100deg, #34d399 0%, #60a5fa 50%, #c084fc 100%);
+  background: linear-gradient(100deg, #34d399 0%, #60a5fa 35%, #c084fc 65%, #34d399 100%);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: gradientShift 6s linear infinite;
 }
 
 .nav-links { display: flex; gap: 32px; }
@@ -287,6 +318,7 @@ const EXPERIENCE = [
       'Promoted to Software Engineering Lead for expanding the agentic platform well beyond its original scope.',
       'Owns the UI repository end-to-end and serves as a key driver of the company\'s AI initiatives.',
       'Built an automated quality framework in Claude Code spanning the UI, agentic, and API repos — evaluating each against 130 benchmark questions plus their follow-ups and auto-remediating failures until reaching a 100% pass rate.',
+      'Automated the team\'s code review with Claude routines (scheduled agents) that review every change and surface issues without manual kickoff.',
       'Builds internal developer tools and applies them across the UI to accelerate delivery.',
       'Leads the agentic chat experience, from interaction design through production reliability.',
       'Contributes across all repositories using AI-assisted engineering workflows.',
@@ -359,12 +391,12 @@ const SKILLS = [
   {
     category: 'AI & Agentic',
     color: P.purple,
-    items: ['Claude Code', 'LangChain', 'LangGraph', 'Agentic Workflows', 'No-dev Pipeline Architecture', 'Cloudflare RAG', 'Tool Integrations'],
+    items: ['Claude Code', 'Claude Routines', 'LangChain', 'LangGraph', 'Agentic Workflows', 'No-dev Pipeline Architecture', 'Cloudflare RAG', 'Tool Integrations'],
   },
   {
     category: 'Testing & Analytics',
     color: P.orange,
-    items: ['Jasmine', 'Karma', 'Jest', 'Unit Testing (91%+)', 'Evals', 'Segment Analytics'],
+    items: ['Jasmine', 'Karma', 'Jest', 'Unit Testing (91%+)', 'Evals', 'Automated Code Review', 'Segment Analytics'],
   },
 ]
 
@@ -599,7 +631,7 @@ function About() {
   const [hovered, setHovered] = useState(false)
 
   return (
-    <section id="about" style={{ paddingTop: 48, paddingBottom: 48, borderTop: '1px solid #1e293b' }}>
+    <section id="about" className="reveal" style={{ paddingTop: 48, paddingBottom: 48, borderTop: '1px solid #1e293b' }}>
       <SectionLabel label="ABOUT" color={P.emerald} />
       <div
         onMouseEnter={() => setHovered(true)}
@@ -611,7 +643,7 @@ function About() {
           padding: '32px 38px',
           transition: 'transform 0.3s cubic-bezier(.2,.7,.3,1), border-color 0.3s, box-shadow 0.3s',
           boxShadow: hovered ? '0 16px 42px -14px #34d39933' : 'none',
-          transform: hovered ? 'translateY(-4px)' : 'none',
+          transform: hovered ? 'translateY(-8px)' : 'none',
         }}
       >
         <div className="mono" style={{ color: '#1e4a2e', fontSize: 12, marginBottom: 24, letterSpacing: '0.05em' }}>
@@ -641,7 +673,7 @@ function About() {
 
 function ExperienceSection() {
   return (
-    <section id="experience" style={{ paddingTop: 48, paddingBottom: 48, borderTop: '1px solid #1e293b' }}>
+    <section id="experience" className="reveal" style={{ paddingTop: 48, paddingBottom: 48, borderTop: '1px solid #1e293b' }}>
       <SectionLabel label="EXPERIENCE" color={P.blue} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {EXPERIENCE.map((exp, i) => <ExpCard key={i} exp={exp} />)}
@@ -659,13 +691,20 @@ function ExpCard({ exp }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         background: P.surface,
-        border: `1px solid ${hovered ? exp.color + '55' : P.border}`,
+        borderStyle: 'solid',
+        borderTopWidth: 1,
+        borderRightWidth: 1,
+        borderBottomWidth: 1,
+        borderLeftWidth: 3,
+        borderTopColor: hovered ? exp.color + '55' : P.border,
+        borderRightColor: hovered ? exp.color + '55' : P.border,
+        borderBottomColor: hovered ? exp.color + '55' : P.border,
+        borderLeftColor: exp.color,
         borderRadius: 14,
         padding: '26px 30px',
         transition: 'transform 0.25s cubic-bezier(.2,.7,.3,1), border-color 0.25s, box-shadow 0.25s',
         boxShadow: hovered ? `0 16px 40px -14px ${exp.color}38` : 'none',
-        borderLeft: `3px solid ${exp.color}`,
-        transform: hovered ? 'translateY(-4px)' : 'none',
+        transform: hovered ? 'translateY(-8px)' : 'none',
       }}
     >
       <div className="exp-header">
@@ -714,7 +753,11 @@ function SkillsSection() {
     <section id="skills" style={{ paddingTop: 48, paddingBottom: 48, borderTop: '1px solid #1e293b' }}>
       <SectionLabel label="SKILLS" color={P.purple} />
       <div className="skills-grid">
-        {SKILLS.map((cat, i) => <SkillCard key={i} cat={cat} />)}
+        {SKILLS.map((cat, i) => (
+          <div key={i} className={`reveal${i > 0 ? ' reveal-' + (i + 1) : ''}`}>
+            <SkillCard cat={cat} />
+          </div>
+        ))}
       </div>
     </section>
   )
@@ -729,13 +772,20 @@ function SkillCard({ cat }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         background: P.surface,
-        border: `1px solid ${hovered ? cat.color + '55' : P.border}`,
+        borderStyle: 'solid',
+        borderTopWidth: 2,
+        borderRightWidth: 1,
+        borderBottomWidth: 1,
+        borderLeftWidth: 1,
+        borderTopColor: cat.color,
+        borderRightColor: hovered ? cat.color + '55' : P.border,
+        borderBottomColor: hovered ? cat.color + '55' : P.border,
+        borderLeftColor: hovered ? cat.color + '55' : P.border,
         borderRadius: 14,
         padding: '22px',
         transition: 'transform 0.25s cubic-bezier(.2,.7,.3,1), border-color 0.25s, box-shadow 0.25s',
         boxShadow: hovered ? `0 16px 40px -14px ${cat.color}38` : 'none',
-        borderTop: `2px solid ${cat.color}`,
-        transform: hovered ? 'translateY(-5px)' : 'none',
+        transform: hovered ? 'translateY(-8px)' : 'none',
       }}
     >
       <div className="mono" style={{
@@ -778,6 +828,36 @@ function ChatSection() {
   const chatEndRef = useRef(null)
   const nextId = useRef(0)
 
+  const [listening, setListening] = useState(false)
+  const [voiceOn, setVoiceOn] = useState(false)
+  const voiceOnRef = useRef(false)
+  const recognitionRef = useRef(null)
+  const micSupported = typeof window !== 'undefined' && !!(window.SpeechRecognition || window.webkitSpeechRecognition)
+  const ttsSupported = typeof window !== 'undefined' && 'speechSynthesis' in window
+
+  const speakText = useCallback((text) => {
+    if (!voiceOnRef.current || !('speechSynthesis' in window)) return
+    try {
+      window.speechSynthesis.cancel()
+      const u = new SpeechSynthesisUtterance(text)
+      u.rate = 1.03
+      u.pitch = 1
+      u.lang = 'en-US'
+      window.speechSynthesis.speak(u)
+    } catch { /* ignore */ }
+  }, [])
+
+  const toggleVoice = useCallback(() => {
+    setVoiceOn(v => {
+      const next = !v
+      voiceOnRef.current = next
+      if (!next && 'speechSynthesis' in window) window.speechSynthesis.cancel()
+      return next
+    })
+  }, [])
+
+  useEffect(() => () => { if ('speechSynthesis' in window) window.speechSynthesis.cancel() }, [])
+
   useEffect(() => {
     if (messages.length === 0 && !loading && !isTyping) return
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -800,6 +880,8 @@ function ChatSection() {
 
   const sendMessage = useCallback(async (text) => {
     if (!text.trim() || loading || isTyping) return
+
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel()
 
     const userMsg = { role: 'user', content: text, id: nextId.current++ }
     setMessages(prev => [...prev, userMsg])
@@ -830,6 +912,7 @@ function ChatSection() {
 
       setHistory([...newHistory, { role: 'assistant', content: reply }])
       setLoading(false)
+      speakText(reply)
 
       animateTyping(reply, () => {
         setMessages(prev => [...prev, { role: 'ai', content: reply, id: nextId.current++ }])
@@ -839,7 +922,7 @@ function ChatSection() {
       setLoading(false)
       setMessages(prev => [...prev, { role: 'ai', content: 'Network error — try again!', id: nextId.current++ }])
     }
-  }, [history, loading, isTyping, animateTyping])
+  }, [history, loading, isTyping, animateTyping, speakText])
 
   const handleKey = useCallback((e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -848,10 +931,30 @@ function ChatSection() {
     }
   }, [input, sendMessage])
 
+  const startListening = useCallback(() => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) return
+    if (recognitionRef.current) { try { recognitionRef.current.stop() } catch { /* ignore */ } return }
+    const rec = new SR()
+    rec.lang = 'en-US'
+    rec.interimResults = false
+    rec.maxAlternatives = 1
+    rec.onresult = (e) => {
+      const transcript = e.results[0][0].transcript
+      setInput(transcript)
+      sendMessage(transcript)
+    }
+    rec.onend = () => { setListening(false); recognitionRef.current = null }
+    rec.onerror = () => { setListening(false); recognitionRef.current = null }
+    recognitionRef.current = rec
+    setListening(true)
+    try { rec.start() } catch { setListening(false); recognitionRef.current = null }
+  }, [sendMessage])
+
   const showSuggestions = messages.length === 0 && !loading && !isTyping
 
   return (
-    <section id="chat" style={{ paddingTop: 48, paddingBottom: 48, borderTop: '1px solid #1e293b' }}>
+    <section id="chat" className="reveal" style={{ paddingTop: 48, paddingBottom: 48, borderTop: '1px solid #1e293b' }}>
       <SectionLabel label="ASK ME ANYTHING" color={P.orange} />
 
       <div style={{ marginBottom: 20 }}>
@@ -937,6 +1040,12 @@ function ChatSection() {
         onSend={() => sendMessage(input)}
         onKey={handleKey}
         disabled={loading || isTyping}
+        micSupported={micSupported}
+        listening={listening}
+        onMic={startListening}
+        ttsSupported={ttsSupported}
+        voiceOn={voiceOn}
+        onToggleVoice={toggleVoice}
       />
     </section>
   )
@@ -997,14 +1106,22 @@ function AiBubble({ content }) {
   )
 }
 
-function ChatInput({ input, setInput, onSend, onKey, disabled }) {
+function ChatInput({ input, setInput, onSend, onKey, disabled, micSupported, listening, onMic, ttsSupported, voiceOn, onToggleVoice }) {
   const [focused, setFocused] = useState(false)
+  const iconBtn = (active, color) => ({
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+    background: active ? `${color}22` : 'none',
+    border: `1px solid ${active ? color : P.border}`,
+    color: active ? color : P.textMuted,
+    transition: 'background .2s, border-color .2s, color .2s, transform .15s',
+  })
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', gap: 12,
+      display: 'flex', alignItems: 'center', gap: 10,
       background: P.surface,
-      border: `1px solid ${focused ? P.orange + '55' : P.border}`,
-      borderRadius: 10, padding: '12px 16px',
+      border: `1px solid ${listening ? P.orange : (focused ? P.orange + '55' : P.border)}`,
+      borderRadius: 10, padding: '10px 12px',
       transition: 'border-color 0.2s',
       opacity: disabled ? 0.6 : 1,
     }}>
@@ -1015,23 +1132,53 @@ function ChatInput({ input, setInput, onSend, onKey, disabled }) {
         onKeyDown={onKey}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        placeholder="Type your question and press Enter..."
+        placeholder={listening ? 'Listening… speak now' : (micSupported ? 'Type, or tap the mic to speak…' : 'Type your question and press Enter…')}
         disabled={disabled}
         style={{
           flex: 1, background: 'none', border: 'none', outline: 'none',
           fontSize: 14, color: P.textPri, letterSpacing: '0.01em',
         }}
       />
+
+      {ttsSupported && (
+        <button
+          onClick={onToggleVoice}
+          title={voiceOn ? 'Voice replies: on' : 'Voice replies: off'}
+          aria-label={voiceOn ? 'Turn off voice replies' : 'Turn on voice replies'}
+          className="btn-anim"
+          style={iconBtn(voiceOn, P.blue)}
+        >
+          {voiceOn ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+          )}
+        </button>
+      )}
+
+      {micSupported && (
+        <button
+          onClick={onMic}
+          disabled={disabled}
+          title={listening ? 'Listening…' : 'Speak your question'}
+          aria-label="Speak your question"
+          className={listening ? 'mic-live' : 'btn-anim'}
+          style={iconBtn(listening, P.orange)}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+        </button>
+      )}
+
       <button
         onClick={onSend}
         disabled={disabled}
+        className="btn-anim"
         style={{
           background: input.trim() && !disabled ? 'linear-gradient(90deg, #34d399, #60a5fa)' : 'none',
           border: `1px solid ${input.trim() && !disabled ? 'transparent' : P.border}`,
           color: input.trim() && !disabled ? '#071a12' : P.textMuted,
           fontSize: 13, fontWeight: 600,
-          padding: '6px 16px', borderRadius: 6, flexShrink: 0,
-          transition: 'all 0.2s',
+          padding: '8px 16px', borderRadius: 6, flexShrink: 0,
         }}
       >
         Send
@@ -1109,6 +1256,17 @@ export default function App() {
       return obs
     })
     return () => observers.forEach(o => o?.disconnect())
+  }, [])
+
+  useEffect(() => {
+    const els = document.querySelectorAll('.reveal')
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target) }
+      })
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' })
+    els.forEach(el => io.observe(el))
+    return () => io.disconnect()
   }, [])
 
   return (
