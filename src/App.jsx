@@ -387,7 +387,7 @@ function ChatInput({ input, setInput, onSend, onKey, disabled, micSupported, lis
         onKeyDown={onKey}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        placeholder={listening ? 'Recording… tap the mic to stop' : transcribing ? 'Transcribing…' : (micSupported ? 'Ask me anything, or tap the mic…' : 'Ask me anything…')}
+        placeholder={listening ? 'Listening… speak, then pause' : transcribing ? 'Transcribing…' : (micSupported ? 'Ask me anything, or tap the mic…' : 'Ask me anything…')}
         disabled={disabled}
         style={{ flex: 1, minWidth: 0, background: 'none', border: 'none', outline: 'none', fontSize: 14.5, color: P.textPri, paddingLeft: 8 }}
       />
@@ -434,6 +434,8 @@ export default function App() {
   const chunksRef = useRef([])
   const micStreamRef = useRef(null)
   const stopTimerRef = useRef(null)
+  const audioCtxRef = useRef(null)
+  const vadIntervalRef = useRef(null)
   const voiceRef = useRef(null)
   const audioRef = useRef(null)
   const micSupported = typeof window !== 'undefined' && typeof navigator !== 'undefined' && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) && 'MediaRecorder' in window
@@ -623,6 +625,9 @@ export default function App() {
       rec.ondataavailable = (e) => { if (e.data && e.data.size) chunksRef.current.push(e.data) }
       rec.onstop = () => {
         if (stopTimerRef.current) { clearTimeout(stopTimerRef.current); stopTimerRef.current = null }
+        if (vadIntervalRef.current) { clearInterval(vadIntervalRef.current); vadIntervalRef.current = null }
+        try { audioCtxRef.current?.close() } catch { /* ignore */ }
+        audioCtxRef.current = null
         setListening(false)
         try { micStreamRef.current?.getTracks().forEach(t => t.stop()) } catch { /* ignore */ }
         micStreamRef.current = null
@@ -633,8 +638,36 @@ export default function App() {
       recorderRef.current = rec
       rec.start()
       setListening(true)
-      // safety auto-stop after 20s
-      stopTimerRef.current = setTimeout(() => { try { rec.state === 'recording' && rec.stop() } catch { /* ignore */ } }, 20000)
+
+      // voice-activity detection: auto-stop ~1.1s after the user stops talking
+      try {
+        const Ctx = window.AudioContext || window.webkitAudioContext
+        const ctx = new Ctx()
+        audioCtxRef.current = ctx
+        const src = ctx.createMediaStreamSource(stream)
+        const analyser = ctx.createAnalyser()
+        analyser.fftSize = 2048
+        src.connect(analyser)
+        const buf = new Uint8Array(analyser.fftSize)
+        const startedAt = Date.now()
+        let spokeAt = 0, lastLoud = 0
+        const stopNow = () => { try { recorderRef.current && recorderRef.current.state === 'recording' && recorderRef.current.stop() } catch { /* ignore */ } }
+        vadIntervalRef.current = setInterval(() => {
+          analyser.getByteTimeDomainData(buf)
+          let sum = 0
+          for (let i = 0; i < buf.length; i++) { const x = (buf[i] - 128) / 128; sum += x * x }
+          const rms = Math.sqrt(sum / buf.length)
+          const now = Date.now()
+          if (rms > 0.045) { lastLoud = now; if (!spokeAt) spokeAt = now }
+          const maxed = now - startedAt > 15000
+          const silenceAfterSpeech = spokeAt && (now - lastLoud > 1000)
+          const noSpeech = !spokeAt && (now - startedAt > 6000)
+          if (maxed || silenceAfterSpeech || noSpeech) stopNow()
+        }, 100)
+      } catch {
+        // no analyser → fall back to a plain 12s safety cap
+        stopTimerRef.current = setTimeout(() => { try { rec.state === 'recording' && rec.stop() } catch { /* ignore */ } }, 12000)
+      }
     } catch {
       setListening(false)
       try { micStreamRef.current?.getTracks().forEach(t => t.stop()) } catch { /* ignore */ }
