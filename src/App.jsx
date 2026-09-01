@@ -495,7 +495,7 @@ export default function App() {
         const r = await fetch('https://api.groq.com/openai/v1/audio/speech', {
           method: 'POST',
           headers: { Authorization: `Bearer ${GROQ_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model: 'canopylabs/orpheus-v1-english', voice: 'leo', input: text, response_format: 'wav' }),
+          body: JSON.stringify({ model: 'canopylabs/orpheus-v1-english', voice: 'daniel', input: text, response_format: 'wav' }),
         })
         if (r.ok) { const blob = await r.blob(); if (voiceOnRef.current && blob && blob.size > 0) { await playBlob(blob); return } }
       } catch { /* fall through */ }
