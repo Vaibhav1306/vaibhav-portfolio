@@ -364,7 +364,7 @@ function AiBubble({ content }) {
 }
 
 // ─── CHAT INPUT ───────────────────────────────────────────────────────────────
-function ChatInput({ input, setInput, onSend, onKey, disabled, micSupported, listening, onMic, ttsSupported, voiceOn, onToggleVoice }) {
+function ChatInput({ input, setInput, onSend, onKey, disabled, micSupported, listening, transcribing, onMic, ttsSupported, voiceOn, onToggleVoice }) {
   const [focused, setFocused] = useState(false)
   const iconBtn = (active, color) => ({
     display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
@@ -387,7 +387,7 @@ function ChatInput({ input, setInput, onSend, onKey, disabled, micSupported, lis
         onKeyDown={onKey}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        placeholder={listening ? 'Listening… speak now' : (micSupported ? 'Ask me anything, or tap the mic…' : 'Ask me anything…')}
+        placeholder={listening ? 'Recording… tap the mic to stop' : transcribing ? 'Transcribing…' : (micSupported ? 'Ask me anything, or tap the mic…' : 'Ask me anything…')}
         disabled={disabled}
         style={{ flex: 1, minWidth: 0, background: 'none', border: 'none', outline: 'none', fontSize: 14.5, color: P.textPri, paddingLeft: 8 }}
       />
@@ -399,8 +399,10 @@ function ChatInput({ input, setInput, onSend, onKey, disabled, micSupported, lis
         </button>
       )}
       {micSupported && (
-        <button onClick={onMic} disabled={disabled} title={listening ? 'Listening…' : 'Speak'} aria-label="Speak your question" className={listening ? 'mic-live' : undefined} style={iconBtn(listening, P.amber)}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+        <button onClick={onMic} disabled={disabled || transcribing} title={listening ? 'Tap to stop' : transcribing ? 'Transcribing…' : 'Speak'} aria-label="Speak your question" className={listening ? 'mic-live' : undefined} style={iconBtn(listening || transcribing, P.amber)}>
+          {transcribing
+            ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite"/></path></svg>
+            : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg>}
         </button>
       )}
       <button onClick={onSend} disabled={disabled} className="btn" style={{
@@ -425,12 +427,16 @@ export default function App() {
   const nextId = useRef(0)
 
   const [listening, setListening] = useState(false)
+  const [transcribing, setTranscribing] = useState(false)
   const [voiceOn, setVoiceOn] = useState(false)
   const voiceOnRef = useRef(false)
-  const recognitionRef = useRef(null)
+  const recorderRef = useRef(null)
+  const chunksRef = useRef([])
+  const micStreamRef = useRef(null)
+  const stopTimerRef = useRef(null)
   const voiceRef = useRef(null)
   const audioRef = useRef(null)
-  const micSupported = typeof window !== 'undefined' && !!(window.SpeechRecognition || window.webkitSpeechRecognition)
+  const micSupported = typeof window !== 'undefined' && typeof navigator !== 'undefined' && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) && 'MediaRecorder' in window
   const ttsSupported = typeof window !== 'undefined' && 'speechSynthesis' in window
 
   const started = messages.length > 0 || loading || isTyping
@@ -581,19 +587,60 @@ export default function App() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input) }
   }, [input, sendMessage])
 
-  const startListening = useCallback(() => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SR) return
-    if (recognitionRef.current) { try { recognitionRef.current.stop() } catch { /* ignore */ } return }
-    const rec = new SR()
-    rec.lang = 'en-US'; rec.interimResults = false; rec.maxAlternatives = 1
-    rec.onresult = (e) => { const t = e.results[0][0].transcript; setInput(t); sendMessage(t) }
-    rec.onend = () => { setListening(false); recognitionRef.current = null }
-    rec.onerror = () => { setListening(false); recognitionRef.current = null }
-    recognitionRef.current = rec
-    setListening(true)
-    try { rec.start() } catch { setListening(false); recognitionRef.current = null }
+  const transcribe = useCallback(async (blob) => {
+    if (!GROQ_KEY || !blob || blob.size < 800) { setTranscribing(false); return }
+    setTranscribing(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', blob, 'audio.webm')
+      fd.append('model', 'whisper-large-v3-turbo')
+      fd.append('response_format', 'json')
+      fd.append('language', 'en')
+      const r = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+        method: 'POST', headers: { Authorization: `Bearer ${GROQ_KEY}` }, body: fd,
+      })
+      const data = await r.json().catch(() => ({}))
+      const text = (data.text || '').trim()
+      setTranscribing(false)
+      if (text) { setInput(text); sendMessage(text) }
+    } catch { setTranscribing(false) }
   }, [sendMessage])
+
+  // record mic → transcribe with Groq Whisper (far better than the browser recognizer)
+  const startListening = useCallback(async () => {
+    // already recording → stop and transcribe
+    if (recorderRef.current && recorderRef.current.state === 'recording') {
+      try { recorderRef.current.stop() } catch { /* ignore */ }
+      return
+    }
+    if (!micSupported) return
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      micStreamRef.current = stream
+      const mime = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find(m => window.MediaRecorder.isTypeSupported?.(m)) || ''
+      const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream)
+      chunksRef.current = []
+      rec.ondataavailable = (e) => { if (e.data && e.data.size) chunksRef.current.push(e.data) }
+      rec.onstop = () => {
+        if (stopTimerRef.current) { clearTimeout(stopTimerRef.current); stopTimerRef.current = null }
+        setListening(false)
+        try { micStreamRef.current?.getTracks().forEach(t => t.stop()) } catch { /* ignore */ }
+        micStreamRef.current = null
+        const blob = new Blob(chunksRef.current, { type: rec.mimeType || 'audio/webm' })
+        recorderRef.current = null
+        transcribe(blob)
+      }
+      recorderRef.current = rec
+      rec.start()
+      setListening(true)
+      // safety auto-stop after 20s
+      stopTimerRef.current = setTimeout(() => { try { rec.state === 'recording' && rec.stop() } catch { /* ignore */ } }, 20000)
+    } catch {
+      setListening(false)
+      try { micStreamRef.current?.getTracks().forEach(t => t.stop()) } catch { /* ignore */ }
+      micStreamRef.current = null
+    }
+  }, [micSupported, transcribe])
 
   return (
     <>
@@ -656,7 +703,7 @@ export default function App() {
               input={input} setInput={setInput}
               onSend={() => sendMessage(input)} onKey={handleKey}
               disabled={loading || isTyping}
-              micSupported={micSupported} listening={listening} onMic={startListening}
+              micSupported={micSupported} listening={listening} transcribing={transcribing} onMic={startListening}
               ttsSupported={ttsSupported} voiceOn={voiceOn} onToggleVoice={toggleVoice}
             />
             <div style={{ textAlign: 'center', color: P.faint, fontSize: 11 }}>
