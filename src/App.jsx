@@ -496,27 +496,29 @@ export default function App() {
   const speakText = useCallback(async (text) => {
     if (!voiceOnRef.current) return
     stopSpeaking()
+    // phonetic spelling for the voice only (on-screen text stays "Cialfo")
+    const spoken = text.replace(/Cialfo/gi, 'See-alfo')
     // 1) Groq Orpheus TTS — natural, no new account (needs one-time model terms acceptance on the Groq org)
     if (GROQ_KEY) {
       try {
         const r = await fetch('https://api.groq.com/openai/v1/audio/speech', {
           method: 'POST',
           headers: { Authorization: `Bearer ${GROQ_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model: 'canopylabs/orpheus-v1-english', voice: 'daniel', input: text, response_format: 'wav' }),
+          body: JSON.stringify({ model: 'canopylabs/orpheus-v1-english', voice: 'daniel', input: spoken, response_format: 'wav' }),
         })
         if (r.ok) { const blob = await r.blob(); if (voiceOnRef.current && blob && blob.size > 0) { await playBlob(blob); return } }
       } catch { /* fall through */ }
     }
     // 2) optional serverless neural provider (ElevenLabs / Google / Azure, if a key is configured)
     try {
-      const r = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) })
+      const r = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: spoken }) })
       if (r.ok) {
         const blob = await r.blob()
         if (voiceOnRef.current && blob && blob.size > 0 && (blob.type || '').includes('audio')) { await playBlob(blob); return }
       }
     } catch { /* fall through */ }
     // 3) device (Web Speech) voice — synthetic fallback
-    if (voiceOnRef.current) deviceSpeak(text)
+    if (voiceOnRef.current) deviceSpeak(spoken)
   }, [stopSpeaking, deviceSpeak, playBlob])
 
   const toggleVoice = useCallback(() => {
