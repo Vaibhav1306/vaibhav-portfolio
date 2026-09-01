@@ -477,26 +477,40 @@ export default function App() {
     } catch { /* ignore */ }
   }, [])
 
-  // try the neural voice via our serverless proxy; fall back to the device voice
+  const playBlob = useCallback(async (blob) => {
+    const url = URL.createObjectURL(blob)
+    const a = new Audio(url)
+    audioRef.current = a
+    a.onended = () => { URL.revokeObjectURL(url); if (audioRef.current === a) audioRef.current = null }
+    await a.play()
+  }, [])
+
+  // natural neural voice (Groq Orpheus, uses the existing key) → serverless provider → device voice
   const speakText = useCallback(async (text) => {
     if (!voiceOnRef.current) return
     stopSpeaking()
+    // 1) Groq Orpheus TTS — natural, no new account (needs one-time model terms acceptance on the Groq org)
+    if (GROQ_KEY) {
+      try {
+        const r = await fetch('https://api.groq.com/openai/v1/audio/speech', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${GROQ_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: 'canopylabs/orpheus-v1-english', voice: 'leo', input: text, response_format: 'wav' }),
+        })
+        if (r.ok) { const blob = await r.blob(); if (voiceOnRef.current && blob && blob.size > 0) { await playBlob(blob); return } }
+      } catch { /* fall through */ }
+    }
+    // 2) optional serverless neural provider (ElevenLabs / Google / Azure, if a key is configured)
     try {
       const r = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) })
       if (r.ok) {
         const blob = await r.blob()
-        if (voiceOnRef.current && blob && blob.size > 0 && (blob.type || '').includes('audio')) {
-          const url = URL.createObjectURL(blob)
-          const a = new Audio(url)
-          audioRef.current = a
-          a.onended = () => { URL.revokeObjectURL(url); if (audioRef.current === a) audioRef.current = null }
-          await a.play()
-          return
-        }
+        if (voiceOnRef.current && blob && blob.size > 0 && (blob.type || '').includes('audio')) { await playBlob(blob); return }
       }
-    } catch { /* fall through to device voice */ }
+    } catch { /* fall through */ }
+    // 3) device (Web Speech) voice — synthetic fallback
     if (voiceOnRef.current) deviceSpeak(text)
-  }, [stopSpeaking, deviceSpeak])
+  }, [stopSpeaking, deviceSpeak, playBlob])
 
   const toggleVoice = useCallback(() => {
     setVoiceOn(v => {
