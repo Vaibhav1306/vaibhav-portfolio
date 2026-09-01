@@ -51,6 +51,43 @@ body {
 @keyframes bl { 50% { opacity: 0; } }
 .blink { animation: bl 1s step-end infinite; }
 
+/* ── motion & interaction ─────────────────────────────────────────────────── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes pulseDot { 0% { box-shadow: 0 0 0 0 #34d39966; } 70% { box-shadow: 0 0 0 7px #34d39900; } 100% { box-shadow: 0 0 0 0 #34d39900; } }
+
+.hero-text > * { animation: fadeUp .6s cubic-bezier(.2,.7,.3,1) both; }
+.hero-text > *:nth-child(2) { animation-delay: .07s; }
+.hero-text > *:nth-child(3) { animation-delay: .14s; }
+.hero-text > *:nth-child(4) { animation-delay: .21s; }
+.hero-text > *:nth-child(5) { animation-delay: .28s; }
+
+/* buttons: lift + gentle press */
+.btn-anim { transition: transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .2s ease, filter .2s ease, background .2s ease, border-color .2s ease; }
+.btn-anim:hover { transform: translateY(-2px) scale(1.03); filter: brightness(1.06); }
+.btn-anim:active { transform: translateY(0) scale(.97); transition-duration: .06s; }
+
+/* skill tags: springy hover */
+.skill-tag { transition: transform .15s cubic-bezier(.2,.7,.3,1), filter .15s ease; cursor: default; }
+.skill-tag:hover { transform: translateY(-2px); filter: brightness(1.3); }
+
+/* animated underline for nav & footer links */
+.link-underline { position: relative; }
+.link-underline::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -5px; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, #34d399, #60a5fa);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .25s cubic-bezier(.2,.7,.3,1);
+}
+.link-underline:hover::after { transform: scaleX(1); }
+
+.pulse-dot { animation: pulseDot 2.2s ease-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-text > *, .pulse-dot { animation: none; }
+  .btn-anim, .skill-tag, .link-underline::after { transition: none; }
+  .btn-anim:hover, .skill-tag:hover { transform: none; }
+}
+
 a { text-decoration: none; color: inherit; }
 button { cursor: pointer; font-family: inherit; }
 input { font-family: inherit; }
@@ -391,6 +428,7 @@ function Nav({ active }) {
           {links.map(l => (
             <button
               key={l.id}
+              className="link-underline"
               onClick={() => scrollToSection(l.id)}
               style={{
                 background: 'none', border: 'none',
@@ -460,7 +498,7 @@ function Hero() {
 
           <div className="hero-buttons">
             <a href="mailto:vshrivastava103@gmail.com">
-              <button style={{
+              <button className="btn-anim" style={{
                 background: 'linear-gradient(100deg, #34d399, #60a5fa)',
                 color: '#071a12',
                 border: 'none', padding: '12px 26px',
@@ -477,7 +515,7 @@ function Hero() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <button style={{
+              <button className="btn-anim" style={{
                 background: '#60a5fa14',
                 color: P.blue,
                 border: `1px solid ${P.blue}60`, padding: '12px 26px',
@@ -494,7 +532,7 @@ function Hero() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <button style={{
+              <button className="btn-anim" style={{
                 background: '#34d39914',
                 color: P.emerald,
                 border: `1px solid ${P.emerald}60`, padding: '12px 26px',
@@ -507,6 +545,7 @@ function Hero() {
             </a>
 
             <button
+              className="btn-anim"
               onClick={() => scrollToSection('chat')}
               style={{
                 background: '#c084fc14',
@@ -530,7 +569,7 @@ function Hero() {
               <div className="hero-photo-tint" />
               <div className="hero-photo-fade" />
               <div className="hero-badge">
-                <span className="hero-badge-dot" />
+                <span className="hero-badge-dot pulse-dot" />
                 Agentic AI · Frontend
               </div>
             </div>
@@ -570,8 +609,9 @@ function About() {
           border: `1px solid ${hovered ? P.emerald + '44' : P.border}`,
           borderRadius: 14,
           padding: '32px 38px',
-          transition: 'border-color 0.3s, box-shadow 0.3s',
-          boxShadow: hovered ? '0 0 32px #34d39918' : 'none',
+          transition: 'transform 0.3s cubic-bezier(.2,.7,.3,1), border-color 0.3s, box-shadow 0.3s',
+          boxShadow: hovered ? '0 16px 42px -14px #34d39933' : 'none',
+          transform: hovered ? 'translateY(-4px)' : 'none',
         }}
       >
         <div className="mono" style={{ color: '#1e4a2e', fontSize: 12, marginBottom: 24, letterSpacing: '0.05em' }}>
@@ -622,9 +662,10 @@ function ExpCard({ exp }) {
         border: `1px solid ${hovered ? exp.color + '55' : P.border}`,
         borderRadius: 14,
         padding: '26px 30px',
-        transition: 'border-color 0.25s, box-shadow 0.25s',
-        boxShadow: hovered ? `0 0 28px ${exp.color}18` : 'none',
+        transition: 'transform 0.25s cubic-bezier(.2,.7,.3,1), border-color 0.25s, box-shadow 0.25s',
+        boxShadow: hovered ? `0 16px 40px -14px ${exp.color}38` : 'none',
         borderLeft: `3px solid ${exp.color}`,
+        transform: hovered ? 'translateY(-4px)' : 'none',
       }}
     >
       <div className="exp-header">
@@ -691,9 +732,10 @@ function SkillCard({ cat }) {
         border: `1px solid ${hovered ? cat.color + '55' : P.border}`,
         borderRadius: 14,
         padding: '22px',
-        transition: 'border-color 0.25s, box-shadow 0.25s',
-        boxShadow: hovered ? `0 0 28px ${cat.color}18` : 'none',
+        transition: 'transform 0.25s cubic-bezier(.2,.7,.3,1), border-color 0.25s, box-shadow 0.25s',
+        boxShadow: hovered ? `0 16px 40px -14px ${cat.color}38` : 'none',
         borderTop: `2px solid ${cat.color}`,
+        transform: hovered ? 'translateY(-5px)' : 'none',
       }}
     >
       <div className="mono" style={{
@@ -705,7 +747,7 @@ function SkillCard({ cat }) {
       </div>
       <div>
         {cat.items.map((item, i) => (
-          <span key={i} style={{
+          <span key={i} className="skill-tag" style={{
             display: 'inline-block',
             background: `${cat.color}12`,
             border: `1px solid ${cat.color}30`,
@@ -913,7 +955,8 @@ function SuggestionChip({ text, onClick }) {
         color: hovered ? P.textSec : P.textMuted,
         padding: '7px 16px', fontSize: 13,
         borderRadius: 20, fontWeight: 400,
-        transition: 'all 0.2s',
+        transform: hovered ? 'translateY(-2px) scale(1.05)' : 'none',
+        transition: 'transform 0.18s cubic-bezier(.2,.7,.3,1), background 0.2s, border-color 0.2s, color 0.2s',
       }}
     >
       {text}
@@ -1005,6 +1048,7 @@ function FooterLink({ href, label, onClick }) {
   return (
     <a
       href={href}
+      className="link-underline"
       onClick={onClick}
       target={external ? '_blank' : undefined}
       rel={external ? 'noopener noreferrer' : undefined}
