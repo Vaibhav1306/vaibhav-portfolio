@@ -438,6 +438,8 @@ export default function App() {
   const vadIntervalRef = useRef(null)
   const voiceRef = useRef(null)
   const audioRef = useRef(null)
+  const ttsCtxRef = useRef(null)
+  const ttsSrcRef = useRef(null)
   const micSupported = typeof window !== 'undefined' && typeof navigator !== 'undefined' && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) && 'MediaRecorder' in window
   const ttsSupported = typeof window !== 'undefined' && 'speechSynthesis' in window
 
@@ -467,6 +469,7 @@ export default function App() {
   }, [])
 
   const stopSpeaking = useCallback(() => {
+    try { if (ttsSrcRef.current) { ttsSrcRef.current.stop(); ttsSrcRef.current = null } } catch { /* ignore */ }
     try { if (audioRef.current) { audioRef.current.pause(); audioRef.current = null } } catch { /* ignore */ }
     if ('speechSynthesis' in window) { try { window.speechSynthesis.cancel() } catch { /* ignore */ } }
   }, [])
@@ -484,12 +487,31 @@ export default function App() {
     } catch { /* ignore */ }
   }, [])
 
-  const playBlob = useCallback(async (blob) => {
-    const url = URL.createObjectURL(blob)
-    const a = new Audio(url)
-    audioRef.current = a
-    a.onended = () => { URL.revokeObjectURL(url); if (audioRef.current === a) audioRef.current = null }
-    await a.play()
+  // unlock/resume the playback AudioContext on a user gesture (bypasses autoplay blocking)
+  const unlockAudio = useCallback(() => {
+    try {
+      const C = window.AudioContext || window.webkitAudioContext
+      if (!C) return
+      if (!ttsCtxRef.current) ttsCtxRef.current = new C()
+      if (ttsCtxRef.current.state === 'suspended') ttsCtxRef.current.resume()
+    } catch { /* ignore */ }
+  }, [])
+
+  // play audio bytes through the (gesture-unlocked) AudioContext — reliable across browsers/mobile
+  const playArrayBuffer = useCallback(async (arrBuf) => {
+    const C = window.AudioContext || window.webkitAudioContext
+    if (!C) throw new Error('no AudioContext')
+    if (!ttsCtxRef.current) ttsCtxRef.current = new C()
+    const ctx = ttsCtxRef.current
+    if (ctx.state === 'suspended') { try { await ctx.resume() } catch { /* ignore */ } }
+    const audioBuf = await ctx.decodeAudioData(arrBuf)
+    try { if (ttsSrcRef.current) ttsSrcRef.current.stop() } catch { /* ignore */ }
+    const src = ctx.createBufferSource()
+    src.buffer = audioBuf
+    src.connect(ctx.destination)
+    src.onended = () => { if (ttsSrcRef.current === src) ttsSrcRef.current = null }
+    ttsSrcRef.current = src
+    src.start()
   }, [])
 
   // natural neural voice (Groq Orpheus, uses the existing key) → serverless provider → device voice
@@ -498,37 +520,51 @@ export default function App() {
     stopSpeaking()
     // phonetic spelling for the voice only (on-screen text stays "Cialfo")
     const spoken = text.replace(/Cialfo/gi, 'See-alfo')
-    // 1) Groq Orpheus TTS — natural, no new account (needs one-time model terms acceptance on the Groq org)
+    // 1) Groq Orpheus TTS — natural voice; retry on transient rate-limit (429) / 5xx
     if (GROQ_KEY) {
-      try {
-        const r = await fetch('https://api.groq.com/openai/v1/audio/speech', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${GROQ_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model: 'canopylabs/orpheus-v1-english', voice: 'daniel', input: spoken, response_format: 'wav' }),
-        })
-        if (r.ok) { const blob = await r.blob(); if (voiceOnRef.current && blob && blob.size > 0) { await playBlob(blob); return } }
-      } catch { /* fall through */ }
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const r = await fetch('https://api.groq.com/openai/v1/audio/speech', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${GROQ_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: 'canopylabs/orpheus-v1-english', voice: 'daniel', input: spoken, response_format: 'wav' }),
+          })
+          if (r.ok) {
+            const ab = await r.arrayBuffer()
+            if (voiceOnRef.current && ab.byteLength > 0) { try { await playArrayBuffer(ab) } catch { /* decode/play issue */ } }
+            return
+          }
+          if (r.status === 429 || r.status >= 500) {
+            if (!voiceOnRef.current) return
+            const ra = parseFloat(r.headers.get('retry-after') || '')
+            await new Promise(res => setTimeout(res, Math.min(Number.isNaN(ra) ? 900 : ra * 1000, 2500)))
+            continue // retry
+          }
+          break // other error → stop trying Orpheus
+        } catch { break }
+      }
     }
-    // 2) optional serverless neural provider (ElevenLabs / Google / Azure, if a key is configured)
+    // 2) optional serverless neural provider (ElevenLabs / Google / Azure, if configured)
     try {
       const r = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: spoken }) })
-      if (r.ok) {
-        const blob = await r.blob()
-        if (voiceOnRef.current && blob && blob.size > 0 && (blob.type || '').includes('audio')) { await playBlob(blob); return }
+      if (r.ok && (r.headers.get('content-type') || '').includes('audio')) {
+        const ab = await r.arrayBuffer()
+        if (voiceOnRef.current && ab.byteLength > 0) { await playArrayBuffer(ab); return }
       }
     } catch { /* fall through */ }
-    // 3) device (Web Speech) voice — synthetic fallback
-    if (voiceOnRef.current) deviceSpeak(spoken)
-  }, [stopSpeaking, deviceSpeak, playBlob])
+    // Deliberately NO device (robotic) fallback on transient failure — prefer silence.
+    // Only use the synthetic voice if no neural key is configured at all.
+    if (!GROQ_KEY && voiceOnRef.current) deviceSpeak(spoken)
+  }, [stopSpeaking, deviceSpeak, playArrayBuffer])
 
   const toggleVoice = useCallback(() => {
     setVoiceOn(v => {
       const next = !v
       voiceOnRef.current = next
-      if (!next) stopSpeaking()
+      if (next) unlockAudio(); else stopSpeaking()
       return next
     })
-  }, [stopSpeaking])
+  }, [stopSpeaking, unlockAudio])
 
   useEffect(() => () => { if ('speechSynthesis' in window) window.speechSynthesis.cancel() }, [])
 
@@ -550,6 +586,7 @@ export default function App() {
 
   const sendMessage = useCallback(async (text) => {
     if (!text.trim() || loading || isTyping) return
+    unlockAudio()
     stopSpeaking()
 
     setMessages(prev => [...prev, { role: 'user', content: text, id: nextId.current++ }])
@@ -580,7 +617,7 @@ export default function App() {
       setLoading(false)
       setMessages(prev => [...prev, { role: 'ai', content: 'Network error — try again!', id: nextId.current++ }])
     }
-  }, [history, loading, isTyping, animateTyping, speakText, stopSpeaking])
+  }, [history, loading, isTyping, animateTyping, speakText, stopSpeaking, unlockAudio])
 
   const revealTopic = useCallback((key) => {
     stopSpeaking()
@@ -620,6 +657,7 @@ export default function App() {
       return
     }
     if (!micSupported) return
+    unlockAudio()
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       micStreamRef.current = stream
@@ -677,7 +715,7 @@ export default function App() {
       try { micStreamRef.current?.getTracks().forEach(t => t.stop()) } catch { /* ignore */ }
       micStreamRef.current = null
     }
-  }, [micSupported, transcribe])
+  }, [micSupported, transcribe, unlockAudio])
 
   return (
     <>
