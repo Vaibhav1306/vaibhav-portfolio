@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 
 const GROQ_KEY = import.meta.env.VITE_GROQ_API_KEY
 
-const SYSTEM_PROMPT = `You are Vaibhav Shrivastava, a Senior Software Engineer at Manifest Global (Cialfo), speaking in first person in a conversational, friendly but professional tone. Answer questions as if you are Vaibhav himself.
+const SYSTEM_PROMPT = `You are Vaibhav Shrivastava, a Software Engineering Lead at Manifest Global (Cialfo), speaking in first person in a conversational, friendly but professional tone. Answer questions as if you are Vaibhav himself.
 
 Key facts:
-- Senior Software Engineer at Cialfo since April 2025. Previously Frontend Engineer there (Jul 2023–Apr 2025).
+- Software Engineering Lead at Cialfo since August 2026 — own the UI repository end-to-end and am a key driver of the company's AI initiatives. Previously Senior Software Engineer there (Apr 2025–Aug 2026) and Frontend Engineer (Jul 2023–Apr 2025).
 - Cialfo: Series B EdTech SaaS ($77M raised), 310,000+ students, 1,000+ universities, 105+ countries.
 - Currently architecting Claude-powered agentic pipelines enabling PMs & designers (3–5 non-engineers) to generate and ship production code independently — ~75% velocity increase, days to hours.
+- Main focus spans the UI and agentic repos: build internal tools and apply them across the UI, and lead the agentic chat experience end-to-end.
+- Built an automated quality framework in Claude Code that tests the UI, agentic, and API repos against 130 benchmark questions plus their follow-ups, then auto-remediates failures until reaching a 100% pass rate.
 - Proficient in Claude Code skill authoring; own the end-to-end skill library powering the no-dev workflow platform.
 - Built pre-commit hook infrastructure enabling non-developer contributions to production codebases.
 - Delivered multi-brand AI chatbot via Cloudflare Workers + Cloudflare-managed RAG; drove ~30% PLT reduction.
@@ -240,9 +242,24 @@ const P = {
 const EXPERIENCE = [
   {
     company: 'Manifest Global (Cialfo)',
-    role: 'Senior Software Engineer',
-    period: 'Apr 2025 – Present',
+    role: 'Software Engineering Lead',
+    period: 'Aug 2026 – Present',
     current: true,
+    color: P.emerald,
+    bullets: [
+      'Promoted to Software Engineering Lead for expanding the agentic platform well beyond its original scope.',
+      'Owns the UI repository end-to-end and serves as a key driver of the company\'s AI initiatives.',
+      'Built an automated quality framework in Claude Code spanning the UI, agentic, and API repos — evaluating each against 130 benchmark questions plus their follow-ups and auto-remediating failures until reaching a 100% pass rate.',
+      'Builds internal developer tools and applies them across the UI to accelerate delivery.',
+      'Leads the agentic chat experience, from interaction design through production reliability.',
+      'Contributes across all repositories using AI-assisted engineering workflows.',
+    ],
+  },
+  {
+    company: 'Manifest Global (Cialfo)',
+    role: 'Senior Software Engineer',
+    period: 'Apr 2025 – Aug 2026',
+    current: false,
     color: P.emerald,
     bullets: [
       'Architected Claude-powered agentic pipelines enabling PMs & designers (3–5 non-engineers) to generate and ship production-ready code prototypes independently — ~75% delivery velocity increase.',
@@ -429,7 +446,7 @@ function Hero() {
             color: P.textSec, fontSize: 15,
             marginBottom: 14, fontWeight: 400,
           }}>
-            Senior Software Engineer &nbsp;·&nbsp; Noida, India &nbsp;·&nbsp; 5 yrs exp
+            Software Engineering Lead &nbsp;·&nbsp; Noida, India &nbsp;·&nbsp; 5+ yrs exp
           </div>
 
           <p style={{
@@ -437,7 +454,7 @@ function Hero() {
             lineHeight: 1.9, marginBottom: 40,
             fontWeight: 300, fontSize: 15,
           }}>
-            Building agentic AI pipelines at Cialfo —
+            Leading UI and agentic AI work at Cialfo —
             multiplying team output by enabling PMs and designers to prototype and ship, without compromising code quality.
           </p>
 
@@ -544,19 +561,19 @@ function About() {
           cat about.md
         </div>
         <p style={{ color: P.textSec, marginBottom: 18, fontWeight: 300, lineHeight: 1.9, fontSize: 15 }}>
-          I'm a Senior Software Engineer at{' '}
+          I'm a Software Engineering Lead at{' '}
           <span style={{ color: P.textPri, fontWeight: 500 }}>Cialfo</span> — a Series B
           EdTech SaaS platform ($77M raised) serving 310,000+ students and 1,000+ universities
           across 105+ countries. I bring 5 years of frontend engineering experience to building
           systems that push what's possible without a traditional dev workflow.
         </p>
         <p style={{ color: P.textSec, fontWeight: 300, lineHeight: 1.9, fontSize: 15 }}>
-          My current focus is on{' '}
-          <span style={{ color: P.emerald, fontWeight: 500 }}>agentic AI pipelines</span> —
-          architecting Claude-powered systems that allow PMs, designers, and other
-          non-engineers to independently generate and ship production-ready code. I've also
-          built multi-brand AI chatbots on Cloudflare Workers with RAG and driven meaningful
-          performance improvements across the platform.
+          I own the UI codebase and drive the company's work on the{' '}
+          <span style={{ color: P.emerald, fontWeight: 500 }}>AI front</span> —
+          architecting Claude-powered systems that let PMs, designers, and other
+          non-engineers independently generate and ship production-ready code. I also built an
+          automated quality framework in Claude Code that tests our UI, agentic, and API repos
+          against 130 benchmark questions and their follow-ups, auto-fixing until every one passes.
         </p>
       </div>
     </section>
