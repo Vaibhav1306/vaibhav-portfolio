@@ -16,7 +16,7 @@ Key facts:
 - Mentored 2 AI engineering interns to on-time delivery.
 - Previously: MAQ Software (Angular enterprise, 91%+ test coverage), Accenture.
 - Education: B.Tech IT, Technocrats Institute of Technology Bhopal, CGPA 8.64, 2021.
-- Core skills: Angular (expert), TypeScript, JavaScript, Tailwind, RxJS, Cloudflare Workers, Claude Code, RAG, Jasmine/Karma.
+- Core skills: Angular (expert), TypeScript, JavaScript, Tailwind, RxJS, Cloudflare Workers, Claude Code, LangChain, LangGraph, RAG, Evals, Jasmine/Karma.
 - Email: vshrivastava103@gmail.com
 - LinkedIn: https://www.linkedin.com/in/vaibhav-shrivastava-aa637116a/
 
@@ -322,12 +322,12 @@ const SKILLS = [
   {
     category: 'AI & Agentic',
     color: P.purple,
-    items: ['Claude Code', 'Agentic Workflows', 'No-dev Pipeline Architecture', 'Cloudflare RAG', 'Tool Integrations'],
+    items: ['Claude Code', 'LangChain', 'LangGraph', 'Agentic Workflows', 'No-dev Pipeline Architecture', 'Cloudflare RAG', 'Tool Integrations'],
   },
   {
     category: 'Testing & Analytics',
     color: P.orange,
-    items: ['Jasmine', 'Karma', 'Jest', 'Unit Testing (91%+)', 'Segment Analytics'],
+    items: ['Jasmine', 'Karma', 'Jest', 'Unit Testing (91%+)', 'Evals', 'Segment Analytics'],
   },
 ]
 
