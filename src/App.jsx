@@ -364,7 +364,7 @@ function AiBubble({ content }) {
 }
 
 // ─── CHAT INPUT ───────────────────────────────────────────────────────────────
-function ChatInput({ input, setInput, onSend, onKey, disabled, micSupported, listening, transcribing, onMic, ttsSupported, voiceOn, onToggleVoice }) {
+function ChatInput({ input, setInput, onSend, onKey, disabled, micSupported, listening, transcribing, onMic }) {
   const [focused, setFocused] = useState(false)
   const iconBtn = (active, color) => ({
     display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
@@ -391,13 +391,6 @@ function ChatInput({ input, setInput, onSend, onKey, disabled, micSupported, lis
         disabled={disabled}
         style={{ flex: 1, minWidth: 0, background: 'none', border: 'none', outline: 'none', fontSize: 14.5, color: P.textPri, paddingLeft: 8 }}
       />
-      {ttsSupported && (
-        <button onClick={onToggleVoice} title={voiceOn ? 'Voice replies: on' : 'Voice replies: off'} aria-label="Toggle voice replies" style={iconBtn(voiceOn, P.copper)}>
-          {voiceOn
-            ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-            : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>}
-        </button>
-      )}
       {micSupported && (
         <button onClick={onMic} disabled={disabled || transcribing} title={listening ? 'Tap to stop' : transcribing ? 'Transcribing…' : 'Speak'} aria-label="Speak your question" className={listening ? 'mic-live' : undefined} style={iconBtn(listening || transcribing, P.amber)}>
           {transcribing
@@ -428,145 +421,15 @@ export default function App() {
 
   const [listening, setListening] = useState(false)
   const [transcribing, setTranscribing] = useState(false)
-  const [voiceOn, setVoiceOn] = useState(false)
-  const voiceOnRef = useRef(false)
   const recorderRef = useRef(null)
   const chunksRef = useRef([])
   const micStreamRef = useRef(null)
   const stopTimerRef = useRef(null)
   const audioCtxRef = useRef(null)
   const vadIntervalRef = useRef(null)
-  const voiceRef = useRef(null)
-  const audioRef = useRef(null)
-  const ttsCtxRef = useRef(null)
-  const ttsSrcRef = useRef(null)
   const micSupported = typeof window !== 'undefined' && typeof navigator !== 'undefined' && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) && 'MediaRecorder' in window
-  const ttsSupported = typeof window !== 'undefined' && 'speechSynthesis' in window
 
   const started = messages.length > 0 || loading || isTyping
-
-  // pick the most natural Indian-English male voice available on the viewer's device
-  useEffect(() => {
-    if (!('speechSynthesis' in window)) return
-    const pick = () => {
-      const voices = window.speechSynthesis.getVoices()
-      if (!voices.length) return
-      const has = (v, ...kw) => kw.some(k => (v.name || '').toLowerCase().includes(k))
-      const inIN = voices.filter(v => v.lang === 'en-IN' || v.lang === 'hi-IN')
-      const enNatural = voices.filter(v => (v.lang || '').startsWith('en') && has(v, 'natural', 'online'))
-      voiceRef.current =
-        voices.find(v => v.lang === 'en-IN' && has(v, 'prabhat', 'ravi', 'madhur')) ||
-        voices.find(v => has(v, 'prabhat', 'ravi', 'madhur')) ||
-        inIN.find(v => has(v, 'natural', 'online')) ||
-        inIN.find(v => v.lang === 'en-IN') ||
-        (enNatural.find(v => has(v, 'male')) || enNatural[0]) ||
-        voices.find(v => (v.lang || '').startsWith('en')) ||
-        voices[0] || null
-    }
-    pick()
-    window.speechSynthesis.onvoiceschanged = pick
-    return () => { try { window.speechSynthesis.onvoiceschanged = null } catch { /* ignore */ } }
-  }, [])
-
-  const stopSpeaking = useCallback(() => {
-    try { if (ttsSrcRef.current) { ttsSrcRef.current.stop(); ttsSrcRef.current = null } } catch { /* ignore */ }
-    try { if (audioRef.current) { audioRef.current.pause(); audioRef.current = null } } catch { /* ignore */ }
-    if ('speechSynthesis' in window) { try { window.speechSynthesis.cancel() } catch { /* ignore */ } }
-  }, [])
-
-  // device (Web Speech) fallback — synthetic, used only if no neural TTS is configured
-  const deviceSpeak = useCallback((text) => {
-    if (!('speechSynthesis' in window)) return
-    try {
-      window.speechSynthesis.cancel()
-      const u = new SpeechSynthesisUtterance(text)
-      if (voiceRef.current) { u.voice = voiceRef.current; u.lang = voiceRef.current.lang || 'en-IN' }
-      else u.lang = 'en-IN'
-      u.rate = 0.98; u.pitch = 1
-      window.speechSynthesis.speak(u)
-    } catch { /* ignore */ }
-  }, [])
-
-  // unlock/resume the playback AudioContext on a user gesture (bypasses autoplay blocking)
-  const unlockAudio = useCallback(() => {
-    try {
-      const C = window.AudioContext || window.webkitAudioContext
-      if (!C) return
-      if (!ttsCtxRef.current) ttsCtxRef.current = new C()
-      if (ttsCtxRef.current.state === 'suspended') ttsCtxRef.current.resume()
-    } catch { /* ignore */ }
-  }, [])
-
-  // play audio bytes through the (gesture-unlocked) AudioContext — reliable across browsers/mobile
-  const playArrayBuffer = useCallback(async (arrBuf) => {
-    const C = window.AudioContext || window.webkitAudioContext
-    if (!C) throw new Error('no AudioContext')
-    if (!ttsCtxRef.current) ttsCtxRef.current = new C()
-    const ctx = ttsCtxRef.current
-    if (ctx.state === 'suspended') { try { await ctx.resume() } catch { /* ignore */ } }
-    const audioBuf = await ctx.decodeAudioData(arrBuf)
-    try { if (ttsSrcRef.current) ttsSrcRef.current.stop() } catch { /* ignore */ }
-    const src = ctx.createBufferSource()
-    src.buffer = audioBuf
-    src.connect(ctx.destination)
-    src.onended = () => { if (ttsSrcRef.current === src) ttsSrcRef.current = null }
-    ttsSrcRef.current = src
-    src.start()
-  }, [])
-
-  // natural neural voice (Groq Orpheus, uses the existing key) → serverless provider → device voice
-  const speakText = useCallback(async (text) => {
-    if (!voiceOnRef.current) return
-    stopSpeaking()
-    // phonetic spelling for the voice only (on-screen text stays "Cialfo")
-    const spoken = text.replace(/Cialfo/gi, 'See-alfo')
-    // 1) Groq Orpheus TTS — natural voice; retry on transient rate-limit (429) / 5xx
-    if (GROQ_KEY) {
-      for (let attempt = 0; attempt < 3; attempt++) {
-        try {
-          const r = await fetch('https://api.groq.com/openai/v1/audio/speech', {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${GROQ_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ model: 'canopylabs/orpheus-v1-english', voice: 'daniel', input: spoken, response_format: 'wav' }),
-          })
-          if (r.ok) {
-            const ab = await r.arrayBuffer()
-            if (voiceOnRef.current && ab.byteLength > 0) { try { await playArrayBuffer(ab) } catch { /* decode/play issue */ } }
-            return
-          }
-          if (r.status === 429 || r.status >= 500) {
-            if (!voiceOnRef.current) return
-            const ra = parseFloat(r.headers.get('retry-after') || '')
-            await new Promise(res => setTimeout(res, Math.min(Number.isNaN(ra) ? 900 : ra * 1000, 2500)))
-            continue // retry
-          }
-          break // other error → stop trying Orpheus
-        } catch { break }
-      }
-    }
-    // 2) optional serverless neural provider (ElevenLabs / Google / Azure, if configured)
-    try {
-      const r = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: spoken }) })
-      if (r.ok && (r.headers.get('content-type') || '').includes('audio')) {
-        const ab = await r.arrayBuffer()
-        if (voiceOnRef.current && ab.byteLength > 0) { await playArrayBuffer(ab); return }
-      }
-    } catch { /* fall through */ }
-    // Deliberately NO device (robotic) fallback on transient failure — prefer silence.
-    // Only use the synthetic voice if no neural key is configured at all.
-    if (!GROQ_KEY && voiceOnRef.current) deviceSpeak(spoken)
-  }, [stopSpeaking, deviceSpeak, playArrayBuffer])
-
-  const toggleVoice = useCallback(() => {
-    setVoiceOn(v => {
-      const next = !v
-      voiceOnRef.current = next
-      if (next) unlockAudio(); else stopSpeaking()
-      return next
-    })
-  }, [stopSpeaking, unlockAudio])
-
-  useEffect(() => () => { if ('speechSynthesis' in window) window.speechSynthesis.cancel() }, [])
 
   useEffect(() => {
     if (!started) return
@@ -586,8 +449,6 @@ export default function App() {
 
   const sendMessage = useCallback(async (text) => {
     if (!text.trim() || loading || isTyping) return
-    unlockAudio()
-    stopSpeaking()
 
     setMessages(prev => [...prev, { role: 'user', content: text, id: nextId.current++ }])
     setInput('')
@@ -608,7 +469,6 @@ export default function App() {
       const reply = data?.choices?.[0]?.message?.content || 'Something went wrong — please try again.'
       setHistory([...newHistory, { role: 'assistant', content: reply }])
       setLoading(false)
-      speakText(reply)
       animateTyping(reply, () => {
         setMessages(prev => [...prev, { role: 'ai', content: reply, id: nextId.current++ }])
         setTypingText('')
@@ -617,12 +477,11 @@ export default function App() {
       setLoading(false)
       setMessages(prev => [...prev, { role: 'ai', content: 'Network error — try again!', id: nextId.current++ }])
     }
-  }, [history, loading, isTyping, animateTyping, speakText, stopSpeaking, unlockAudio])
+  }, [history, loading, isTyping, animateTyping])
 
   const revealTopic = useCallback((key) => {
-    stopSpeaking()
     setMessages(prev => [...prev, { role: 'card', kind: key, id: nextId.current++ }])
-  }, [stopSpeaking])
+  }, [])
 
   const handleKey = useCallback((e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input) }
@@ -657,7 +516,6 @@ export default function App() {
       return
     }
     if (!micSupported) return
-    unlockAudio()
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       micStreamRef.current = stream
@@ -715,7 +573,7 @@ export default function App() {
       try { micStreamRef.current?.getTracks().forEach(t => t.stop()) } catch { /* ignore */ }
       micStreamRef.current = null
     }
-  }, [micSupported, transcribe, unlockAudio])
+  }, [micSupported, transcribe])
 
   return (
     <>
@@ -781,10 +639,9 @@ export default function App() {
               onSend={() => sendMessage(input)} onKey={handleKey}
               disabled={loading || isTyping}
               micSupported={micSupported} listening={listening} transcribing={transcribing} onMic={startListening}
-              ttsSupported={ttsSupported} voiceOn={voiceOn} onToggleVoice={toggleVoice}
             />
             <div style={{ textAlign: 'center', color: P.faint, fontSize: 11 }}>
-              © 2026 Vaibhav Shrivastava · Groq-powered · voice-enabled
+              © 2026 Vaibhav Shrivastava · Groq-powered · voice input
             </div>
           </div>
         </div>
