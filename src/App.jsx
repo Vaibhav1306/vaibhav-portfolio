@@ -223,6 +223,15 @@ const TOPICS = [
   { key: 'about', label: 'About me' },
 ]
 
+// tapping a topic reads like a question → a short typed reply → the card
+const TOPIC_META = {
+  work:     { q: 'Show me your work',            a: "Here's the work I'm most proud of —" },
+  stats:    { q: 'Show me the numbers',          a: 'A few numbers that capture the impact —' },
+  skills:   { q: "What's your stack?",           a: 'This is what I build with —' },
+  timeline: { q: 'Walk me through your journey',  a: "Here's the path so far —" },
+  about:    { q: 'Tell me about yourself',       a: 'The short version —' },
+}
+
 // ─── NAV ──────────────────────────────────────────────────────────────────────
 function Nav() {
   return (
@@ -262,14 +271,35 @@ function CardHeader({ label, color }) {
   return <div style={{ fontSize: 10.5, letterSpacing: '.16em', fontWeight: 600, textTransform: 'uppercase', color, marginBottom: 14 }}>{label}</div>
 }
 
+function CountUp({ value, color }) {
+  const parts = String(value).match(/^(\D*)([\d.]+)(.*)$/)
+  const [disp, setDisp] = useState(parts ? parts[1] + '0' + parts[3] : value)
+  useEffect(() => {
+    if (!parts) { setDisp(value); return }
+    const pre = parts[1], target = parseFloat(parts[2]), post = parts[3]
+    const dur = 1000, t0 = performance.now()
+    let raf
+    const step = (t) => {
+      const p = Math.min((t - t0) / dur, 1)
+      const eased = 1 - Math.pow(1 - p, 3)
+      setDisp(pre + Math.round(target * eased) + post)
+      if (p < 1) raf = requestAnimationFrame(step)
+      else setDisp(pre + parts[2] + post)
+    }
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+  }, [value]) // eslint-disable-line
+  return <div className="display" style={{ fontSize: 30, fontWeight: 700, color, lineHeight: 1 }}>{disp}</div>
+}
+
 function StatsCard() {
   return (
     <CardShell>
       <CardHeader label="By the numbers" color={P.amber} />
-      <div className="stat-grid">
+      <div className="stat-grid stagger">
         {STATS.map((s, i) => (
           <div key={i}>
-            <div className="display" style={{ fontSize: 30, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</div>
+            <CountUp value={s.value} color={s.color} />
             <div style={{ color: P.textMuted, fontSize: 12.5, marginTop: 5 }}>{s.label}</div>
           </div>
         ))}
@@ -282,7 +312,7 @@ function WorkCard() {
   return (
     <CardShell>
       <CardHeader label="What I build" color={P.amber} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
+      <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
         {WORK.map((w, i) => (
           <div key={i} style={{ borderLeft: `2px solid ${w.color}`, paddingLeft: 13 }}>
             <div className="display" style={{ color: P.textPri, fontSize: 14.5, fontWeight: 600, marginBottom: 4 }}>{w.title}</div>
@@ -298,7 +328,7 @@ function SkillsCard() {
   return (
     <CardShell>
       <CardHeader label="My stack" color={P.rose} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {SKILLS.map((cat, i) => (
           <div key={i}>
             <div className="mono" style={{ fontSize: 10, letterSpacing: '.08em', color: cat.color, marginBottom: 7, textTransform: 'uppercase' }}>{cat.category}</div>
@@ -318,7 +348,7 @@ function TimelineCard() {
   return (
     <CardShell>
       <CardHeader label="Experience" color={P.copper} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
+      <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
         {EXPERIENCE.map((e, i) => (
           <div key={i} style={{ borderLeft: `2px solid ${e.color}`, paddingLeft: 13 }}>
             {e.current && <span className="mono" style={{ fontSize: 9, color: e.color, letterSpacing: '.08em', fontWeight: 600 }}>● CURRENT</span>}
@@ -480,8 +510,17 @@ export default function App() {
   }, [history, loading, isTyping, animateTyping])
 
   const revealTopic = useCallback((key) => {
-    setMessages(prev => [...prev, { role: 'card', kind: key, id: nextId.current++ }])
-  }, [])
+    if (loading || isTyping) return
+    const meta = TOPIC_META[key] || { q: key, a: '' }
+    setMessages(prev => [...prev, { role: 'user', content: meta.q, id: nextId.current++ }])
+    animateTyping(meta.a, () => {
+      setMessages(prev => [
+        ...prev,
+        { role: 'ai', content: meta.a, id: nextId.current++ },
+        { role: 'card', kind: key, id: nextId.current++ },
+      ])
+    })
+  }, [loading, isTyping, animateTyping])
 
   const handleKey = useCallback((e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input) }
