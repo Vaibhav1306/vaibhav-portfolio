@@ -14,7 +14,7 @@ Key facts:
 - Lead engineering across Cialfo, not just the UI — UI is my speciality. Now contributing on the Ruby backend and infra side and building end-to-end applications, using Claude Code for much of that work. I'm honest that backend and infra are areas I'm still growing in; with Claude Code they aren't a blocker.
 - Own APM error management on Sentry and AppSignal, aligning the team on fixing what surfaces.
 - Automated the entire code review process using Claude routines.
-- Built student-facing and counselor-facing AI agents for Cialfo on the Mastra framework, which organises the agents and their tools. Built the tools from the ground up. The agents render dynamic UI inside the conversation. Built eval labs to test the agents, and shipped them to production.
+- Built student-facing and counselor-facing AI agents for Cialfo on the Mastra framework, which organises the agents and their tools. The agents are a layer on top of Cialfo's existing APIs: I built the tools from the ground up by transforming those APIs into MCP tools. Knowledge bases are connected through Cloudflare AutoRAG. The agents render dynamic UI inside the conversation. Built eval labs to test the agents, and shipped them to production.
 - Recently built a revenue-generating AI notes feature: users record notes, and transcription recognises company-specific key terms and separates speakers with diarisation.
 - Cialfo: Series B EdTech SaaS ($77M raised), 310,000+ students, 1,000+ universities, 105+ countries.
 - Currently architecting Claude-powered agentic pipelines enabling PMs & designers (3–5 non-engineers) to generate and ship production code independently — ~75% velocity increase, days to hours.
@@ -311,10 +311,10 @@ const HERO_METRICS = [
 const WORK = [
   {
     title: 'Student & counselor AI agents', ctx: 'Cialfo · builder', color: P.amber,
-    body: 'AI agents for both sides of Cialfo’s platform — students and counselors. Built on the Mastra framework, with every tool written from the ground up, and agents that render dynamic UI inside the conversation instead of only replying in text. I built the eval labs that test them, and shipped them.',
+    body: 'AI agents for both sides of Cialfo’s platform — students and counselors. They sit on top of Cialfo’s existing APIs: I built the tools from the ground up by turning those APIs into MCP tools, organised with the Mastra framework, and grounded the agents in knowledge bases on Cloudflare AutoRAG. The agents render dynamic UI inside the conversation instead of only replying in text. I built the eval labs that test them, and shipped them.',
     impact: 'Production agents serving both students and counselors, tested in eval labs before they ship.',
-    tools: 'Mastra · custom tools · dynamic UI rendering · eval labs',
-    short: 'Student- and counselor-facing agents on Mastra, with custom tools, dynamic UI and eval labs.',
+    tools: 'Mastra · MCP tools over existing APIs · Cloudflare AutoRAG · dynamic UI rendering · eval labs',
+    short: 'Student- and counselor-facing agents on Mastra — existing APIs turned into MCP tools, AutoRAG knowledge bases, dynamic UI and eval labs.',
   },
   {
     title: 'AI notes with key terms & diarisation', ctx: 'Cialfo · revenue feature', color: P.copper,
@@ -376,7 +376,7 @@ const LEAD = [
 
 const PRINCIPLES = [
   { title: 'Guardrails before autonomy', color: P.amber, body: 'Non-engineers ship through pre-commit hooks and automated validation gates, so moving faster never means skipping the checks.' },
-  { title: 'Ground the model in what’s true', color: P.copper, body: 'Assistants answer from a defined source of truth — managed RAG for the brand chatbots, a fixed set of facts for the assistant on this page — and redirect what’s out of scope.' },
+  { title: 'Ground the model in what’s true', color: P.copper, body: 'Assistants answer from a defined source of truth — Cloudflare AutoRAG knowledge bases and Cialfo’s own APIs as MCP tools for the agents, a fixed set of facts for the assistant on this page — and redirect what’s out of scope.' },
   { title: 'Automate the loop, not just the task', color: P.rose, body: 'Review runs on every change through scheduled Claude routines, so quality doesn’t depend on someone remembering to ask for it.' },
 ]
 
@@ -387,7 +387,7 @@ const ROLES = [
       'Promoted to Lead for expanding the agentic platform beyond its original scope; own end-to-end delivery of business-critical projects across Product, Design, Business and QA.',
       'Acting Engineering Business Lead: manage business stakeholders, gather requirements, allocate resources across projects and keep Cialfo’s product heading in the right direction.',
       'Lead engineering across Cialfo with UI as my speciality — own the UI repository end-to-end and drive the company’s AI initiatives across UI and agentic surfaces.',
-      'Built student-facing and counselor-facing AI agents on the Mastra framework — tools written from the ground up, dynamic UI rendering, and eval labs to test them before shipping.',
+      'Built student-facing and counselor-facing AI agents on the Mastra framework — existing APIs turned into MCP tools, knowledge bases on Cloudflare AutoRAG, dynamic UI rendering, and eval labs to test them before shipping.',
       'Built a revenue-generating AI notes feature with company-specific key terms and speaker diarisation.',
       'Contribute on the Ruby backend and infra, building end-to-end applications with Claude Code.',
       'Own APM error management on Sentry and AppSignal, aligning the team on fixes.',
@@ -431,7 +431,7 @@ const ROLES = [
 
 const TOOLKIT = [
   ['Frontend', 'Angular (expert), TypeScript, JavaScript, RxJS, Tailwind CSS, Angular Material'],
-  ['AI', 'Mastra, Claude Code & routines, LangChain, LangGraph, RAG, eval labs, speech-to-text & diarisation, agentic workflows'],
+  ['AI', 'Mastra, MCP, Cloudflare AutoRAG, Claude Code & routines, LangChain, LangGraph, RAG, eval labs, speech-to-text & diarisation, agentic workflows'],
   ['Backend', 'Ruby (growing), Cloudflare Workers, Wrangler, serverless APIs'],
   ['Ops', 'Sentry, AppSignal (APM), CI/CD'],
   ['Quality', 'Jasmine, Karma, Jest, Segment analytics'],
@@ -449,7 +449,7 @@ const STATS = [
 const SKILLS = [
   { category: 'Frontend', color: P.amber, items: ['Angular', 'TypeScript', 'JavaScript (ES6+)', 'HTML5', 'CSS3', 'Tailwind CSS', 'Angular Material', 'RxJS'] },
   { category: 'Backend & Infra', color: P.copper, items: ['Ruby (growing)', 'Cloudflare Workers', 'Wrangler', 'Serverless API Design', 'Sentry', 'AppSignal'] },
-  { category: 'AI & Agentic', color: P.rose, items: ['Mastra', 'Custom Agent Tools', 'Dynamic UI Rendering', 'Speaker Diarisation', 'Claude Code', 'Claude Routines', 'LangChain', 'LangGraph', 'Agentic Workflows', 'No-dev Pipelines', 'Cloudflare RAG', 'Tool Integrations'] },
+  { category: 'AI & Agentic', color: P.rose, items: ['Mastra', 'MCP Tools', 'Cloudflare AutoRAG', 'Dynamic UI Rendering', 'Speaker Diarisation', 'Claude Code', 'Claude Routines', 'LangChain', 'LangGraph', 'Agentic Workflows', 'No-dev Pipelines', 'Cloudflare RAG', 'Tool Integrations'] },
   { category: 'Testing & Analytics', color: P.sand, items: ['Jasmine', 'Karma', 'Jest', 'Unit Testing (91%+)', 'Evals', 'Automated Code Review', 'Segment'] },
 ]
 
