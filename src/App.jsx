@@ -10,6 +10,12 @@ const SYSTEM_PROMPT = `You are Vaibhav Shrivastava, a Software Engineering Lead 
 
 Key facts:
 - Software Engineering Lead at Cialfo since August 2026 — own the UI repository end-to-end and am a key driver of the company's AI initiatives. Previously Senior Software Engineer there (Apr 2025–Aug 2026) and Frontend Engineer (Jul 2023–Apr 2025).
+- In the same role, now also acting as Cialfo's Engineering Business Lead: manage business stakeholders, gather requirements, allocate resources across projects, and keep Cialfo's product heading in the right direction.
+- Lead engineering across Cialfo, not just the UI — UI is my speciality. Now contributing on the Ruby backend and infra side and building end-to-end applications, using Claude Code for much of that work. I'm honest that backend and infra are areas I'm still growing in; with Claude Code they aren't a blocker.
+- Own APM error management on Sentry and AppSignal, aligning the team on fixing what surfaces.
+- Automated the entire code review process using Claude routines.
+- Built student-facing and counselor-facing AI agents for Cialfo on the Mastra framework, which organises the agents and their tools. Built the tools from the ground up. The agents render dynamic UI inside the conversation. Built eval labs to test the agents, and shipped them to production.
+- Recently built a revenue-generating AI notes feature: users record notes, and transcription recognises company-specific key terms and separates speakers with diarisation.
 - Cialfo: Series B EdTech SaaS ($77M raised), 310,000+ students, 1,000+ universities, 105+ countries.
 - Currently architecting Claude-powered agentic pipelines enabling PMs & designers (3–5 non-engineers) to generate and ship production code independently — ~75% velocity increase, days to hours.
 - Main focus spans the UI and agentic repos: build internal tools and apply them across the UI, and lead the agentic chat experience end-to-end.
@@ -203,6 +209,8 @@ section[id] { scroll-margin-top: 84px; }
 .principle { display: grid; gap: 10px; align-content: start; padding-top: 18px; border-top: 2px solid; }
 .principle h3 { font-family: 'Sora', 'Inter', system-ui, sans-serif; font-size: 19px; font-weight: 600; line-height: 1.3; color: #f6efe4; text-wrap: balance; }
 .principle p { color: #dccfbd; font-size: 15.5px; }
+.principles.two { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 48px; }
+.role-sub { font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #cbb28f; margin: -2px 0 10px; }
 
 /* assistant */
 .assist-grid { display: grid; grid-template-columns: minmax(0, 290px) minmax(0, 1fr); gap: 44px; align-items: start; }
@@ -275,7 +283,7 @@ section[id] { scroll-margin-top: 84px; }
   .metric + .metric { padding-left: 0; border-left: 0; border-top: 1px solid rgba(255,224,190,0.1); }
   .work-item, .role, .assist-grid, .facts { grid-template-columns: 1fr; gap: 14px; }
   .work-ctx { padding-left: 21px; }
-  .principles, .also ul { grid-template-columns: 1fr; }
+  .principles, .principles.two, .also ul { grid-template-columns: 1fr; }
   .panel { height: 580px; max-height: 80vh; }
   .sec { padding-block: 64px; }
 }
@@ -302,28 +310,49 @@ const HERO_METRICS = [
 
 const WORK = [
   {
-    title: 'No-dev agentic pipeline', ctx: 'Cialfo · architect', color: P.amber,
+    title: 'Student & counselor AI agents', ctx: 'Cialfo · builder', color: P.amber,
+    body: 'AI agents for both sides of Cialfo’s platform — students and counselors. Built on the Mastra framework, with every tool written from the ground up, and agents that render dynamic UI inside the conversation instead of only replying in text. I built the eval labs that test them, and shipped them.',
+    impact: 'Production agents serving both students and counselors, tested in eval labs before they ship.',
+    tools: 'Mastra · custom tools · dynamic UI rendering · eval labs',
+    short: 'Student- and counselor-facing agents on Mastra, with custom tools, dynamic UI and eval labs.',
+  },
+  {
+    title: 'AI notes with key terms & diarisation', ctx: 'Cialfo · revenue feature', color: P.copper,
+    body: 'A revenue-generating AI notes feature: users record notes, and transcription recognises company-specific key terms and separates speakers with diarisation.',
+    impact: 'An AI feature that brings in revenue for Cialfo.',
+    tools: 'Speech-to-text · key-term biasing · speaker diarisation',
+    short: 'Revenue-generating AI notes with company-specific key terms and speaker diarisation.',
+  },
+  {
+    title: 'No-dev agentic pipeline', ctx: 'Cialfo · architect', color: P.rose,
     body: 'Claude-powered agentic pipelines that let PMs and designers — three to five non-engineers — generate and ship production-ready code on their own.',
     impact: 'Prototype-to-review went from days to hours, with ~75% higher delivery velocity.',
     tools: 'Claude Code · agentic workflows · Claude Code skills',
     short: "Claude-powered pipelines that let PMs & designers ship production-ready code independently — days to hours.",
   },
   {
-    title: 'Claude Code skill library & safety gates', ctx: 'Cialfo · owner', color: P.copper,
+    title: 'Claude Code skill library & safety gates', ctx: 'Cialfo · owner', color: P.sand,
     body: 'The end-to-end skill library that powers the no-dev workflow platform, plus the pre-commit hooks and automated validation gates that let non-developers contribute to production codebases.',
     impact: 'Non-engineer contributions land in production with CI/CD compliance.',
     tools: 'Claude Code skills · pre-commit hooks · CI/CD',
     short: 'The skill library behind the no-dev platform, plus pre-commit gates that keep non-developer contributions safe.',
   },
   {
-    title: 'Code review on autopilot', ctx: 'Cialfo', color: P.rose,
-    body: 'Claude routines — scheduled agents — review every change and surface issues automatically, so a review never depends on someone remembering to start one.',
-    impact: 'Every change gets a review pass, with no manual kickoff.',
+    title: 'Code review, fully automated', ctx: 'Cialfo · owner', color: P.amber,
+    body: 'I automated the team’s entire code review process with Claude routines — scheduled agents that review every change and surface issues, so review never waits on someone to start it.',
+    impact: 'Every change gets reviewed, with no manual step in the process.',
     tools: 'Claude routines',
-    short: 'Claude routines review every change and surface issues automatically — no manual kickoff.',
+    short: 'The entire code review process runs on Claude routines — every change reviewed, no manual step.',
   },
   {
-    title: 'Multi-brand AI chatbot', ctx: 'Cialfo', color: P.sand,
+    title: 'End-to-end apps, past the UI', ctx: 'Cialfo · full stack', color: P.copper,
+    body: 'UI is my speciality, but I now contribute on Cialfo’s Ruby backend and infra too — building complete applications end to end, with Claude Code carrying much of the backend work while I keep growing on that side.',
+    impact: 'Interface to backend under one owner, with no hand-off between the layers.',
+    tools: 'Ruby · Claude Code · infra',
+    short: 'Building complete applications end to end — UI plus Ruby backend and infra, with Claude Code.',
+  },
+  {
+    title: 'Multi-brand AI chatbot', ctx: 'Cialfo', color: P.textMuted,
     body: 'Production chatbot features across multiple brands on Cloudflare Workers, grounded with Cloudflare-managed RAG and tool integrations, with brand-specific configuration and workflow isolation at the platform level.',
     impact: 'One chatbot platform serving several brands, each isolated in config and workflow.',
     tools: 'Cloudflare Workers · Cloudflare RAG · tool integrations',
@@ -338,6 +367,13 @@ const ALSO = [
   'Mentored two AI engineering interns through to on-time delivery.',
 ]
 
+const LEAD = [
+  { title: 'Stakeholders & requirements', color: P.amber, body: 'I work directly with business stakeholders to gather requirements and turn them into scoped, buildable plans for Cialfo’s product.' },
+  { title: 'Resourcing & direction', color: P.copper, body: 'I allocate resources across projects and keep delivery pointed the right way — solving the problem the business actually has.' },
+  { title: 'Production health', color: P.rose, body: 'I run APM error management on Sentry and AppSignal: triaging what breaks in production and aligning the team on the fixes.' },
+  { title: 'Engineering past the UI', color: P.sand, body: 'I lead engineering across Cialfo with UI as my speciality, and I’m growing on the Ruby backend and infra side — building end to end with Claude Code.' },
+]
+
 const PRINCIPLES = [
   { title: 'Guardrails before autonomy', color: P.amber, body: 'Non-engineers ship through pre-commit hooks and automated validation gates, so moving faster never means skipping the checks.' },
   { title: 'Ground the model in what’s true', color: P.copper, body: 'Assistants answer from a defined source of truth — managed RAG for the brand chatbots, a fixed set of facts for the assistant on this page — and redirect what’s out of scope.' },
@@ -346,12 +382,17 @@ const PRINCIPLES = [
 
 const ROLES = [
   {
-    role: 'Software Engineering Lead', company: 'Manifest Global (Cialfo)', period: 'Aug 2026 – Present', current: true, color: P.amber,
+    role: 'Software Engineering Lead', sub: 'Acting Engineering Business Lead', company: 'Manifest Global (Cialfo)', period: 'Aug 2026 – Present', current: true, color: P.amber,
     bullets: [
       'Promoted to Lead for expanding the agentic platform beyond its original scope; own end-to-end delivery of business-critical projects across Product, Design, Business and QA.',
-      'Own the UI repository end-to-end and drive the company’s AI initiatives, setting technical direction across UI and agentic surfaces.',
+      'Acting Engineering Business Lead: manage business stakeholders, gather requirements, allocate resources across projects and keep Cialfo’s product heading in the right direction.',
+      'Lead engineering across Cialfo with UI as my speciality — own the UI repository end-to-end and drive the company’s AI initiatives across UI and agentic surfaces.',
+      'Built student-facing and counselor-facing AI agents on the Mastra framework — tools written from the ground up, dynamic UI rendering, and eval labs to test them before shipping.',
+      'Built a revenue-generating AI notes feature with company-specific key terms and speaker diarisation.',
+      'Contribute on the Ruby backend and infra, building end-to-end applications with Claude Code.',
+      'Own APM error management on Sentry and AppSignal, aligning the team on fixes.',
+      'Automated the entire code review process with Claude routines.',
       'Lead the agentic chat experience from interaction design to production reliability, and build internal developer tools used across the UI.',
-      'Automated code review with Claude routines that review every change without manual kickoff.',
     ],
   },
   {
@@ -390,9 +431,11 @@ const ROLES = [
 
 const TOOLKIT = [
   ['Frontend', 'Angular (expert), TypeScript, JavaScript, RxJS, Tailwind CSS, Angular Material'],
-  ['AI', 'Claude Code & routines, LangChain, LangGraph, RAG, evals, agentic workflows'],
-  ['Cloud', 'Cloudflare Workers, Wrangler, serverless APIs'],
+  ['AI', 'Mastra, Claude Code & routines, LangChain, LangGraph, RAG, eval labs, speech-to-text & diarisation, agentic workflows'],
+  ['Backend', 'Ruby (growing), Cloudflare Workers, Wrangler, serverless APIs'],
+  ['Ops', 'Sentry, AppSignal (APM), CI/CD'],
   ['Quality', 'Jasmine, Karma, Jest, Segment analytics'],
+  ['Leadership', 'Stakeholder management, requirements, resource planning'],
 ]
 
 // chat cards
@@ -405,12 +448,12 @@ const STATS = [
 
 const SKILLS = [
   { category: 'Frontend', color: P.amber, items: ['Angular', 'TypeScript', 'JavaScript (ES6+)', 'HTML5', 'CSS3', 'Tailwind CSS', 'Angular Material', 'RxJS'] },
-  { category: 'Cloud / Backend', color: P.copper, items: ['Cloudflare Workers', 'Wrangler', 'Serverless API Design'] },
-  { category: 'AI & Agentic', color: P.rose, items: ['Claude Code', 'Claude Routines', 'LangChain', 'LangGraph', 'Agentic Workflows', 'No-dev Pipelines', 'Cloudflare RAG', 'Tool Integrations'] },
+  { category: 'Backend & Infra', color: P.copper, items: ['Ruby (growing)', 'Cloudflare Workers', 'Wrangler', 'Serverless API Design', 'Sentry', 'AppSignal'] },
+  { category: 'AI & Agentic', color: P.rose, items: ['Mastra', 'Custom Agent Tools', 'Dynamic UI Rendering', 'Speaker Diarisation', 'Claude Code', 'Claude Routines', 'LangChain', 'LangGraph', 'Agentic Workflows', 'No-dev Pipelines', 'Cloudflare RAG', 'Tool Integrations'] },
   { category: 'Testing & Analytics', color: P.sand, items: ['Jasmine', 'Karma', 'Jest', 'Unit Testing (91%+)', 'Evals', 'Automated Code Review', 'Segment'] },
 ]
 
-const ABOUT = "I'm a Software Engineering Lead at Cialfo — a Series B EdTech SaaS ($77M raised) serving 310,000+ students and 1,000+ universities across 105+ countries. I own the UI codebase and drive the company's AI-front work, building systems that let non-engineers ship production code."
+const ABOUT = "I'm a Software Engineering Lead at Cialfo, currently acting as its Engineering Business Lead — Cialfo is a Series B EdTech SaaS ($77M raised) serving 310,000+ students and 1,000+ universities across 105+ countries. I lead engineering for the product with UI as my speciality, work with business stakeholders on what we build, and drive the AI work that lets non-engineers ship production code."
 
 const SUGGESTED_PROMPTS = [
   'Tell me about your AI workflow work',
@@ -436,6 +479,7 @@ const TOPIC_META = {
 }
 
 const NAV = [
+  { id: 'lead', label: 'Leadership' },
   { id: 'work', label: 'Work' },
   { id: 'approach', label: 'Approach' },
   { id: 'assistant', label: 'Assistant' },
@@ -935,8 +979,8 @@ export default function App() {
             <div className="hero-text stagger">
               <span className="hero-pill"><i className="pulse-dot" />Software Engineering Lead · Cialfo</span>
               <h1 className="hero-name">Vaibhav<br /><span className="gradient-text">Shrivastava</span></h1>
-              <p className="hero-value">I build agentic systems that let non-engineers ship production code — with the guardrails that keep it safe.</p>
-              <p className="hero-sub">I own the UI codebase at Cialfo and drive its AI work. Five-plus years across frontend and AI engineering, on a platform that serves 310,000+ students.</p>
+              <p className="hero-value">I lead engineering for Cialfo’s product — and build the agentic systems that let anyone on the team ship production code, safely.</p>
+              <p className="hero-sub">Acting Engineering Business Lead: I work with business stakeholders on requirements, resourcing and direction. UI is my speciality; I now build end to end, across Ruby and infra. Five-plus years in, on a platform serving 310,000+ students.</p>
               <div className="hero-actions">
                 <button className="btn btn-primary" onClick={openAssistant}>Ask my assistant</button>
                 <a className="btn btn-ghost" href={LINKEDIN} target="_blank" rel="noopener noreferrer">LinkedIn</a>
@@ -959,12 +1003,30 @@ export default function App() {
           </div>
         </header>
 
+        {/* LEADERSHIP */}
+        <section id="lead" className="sec">
+          <div className="wrap">
+            <div className="sec-head">
+              <span className="eyebrow">What I own</span>
+              <h2 className="h2">From the business ask to production</h2>
+            </div>
+            <div className="principles two">
+              {LEAD.map(p => (
+                <div className="principle" key={p.title} style={{ borderTopColor: p.color }}>
+                  <h3>{p.title}</h3>
+                  <p>{p.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* WORK */}
         <section id="work" className="sec">
           <div className="wrap">
             <div className="sec-head">
               <span className="eyebrow">Selected work</span>
-              <h2 className="h2">Systems that change who gets to ship</h2>
+              <h2 className="h2">Agents in production, and the systems that ship them</h2>
             </div>
             <div className="work">
               {WORK.map(w => (
@@ -1040,6 +1102,7 @@ export default function App() {
                   </div>
                   <div>
                     <h3 style={{ color: r.color }}>{r.role}{r.current && <span className="badge">CURRENT</span>}</h3>
+                    {r.sub && <p className="role-sub">{r.sub}</p>}
                     <ul>{r.bullets.map(b => <li key={b}>{b}</li>)}</ul>
                   </div>
                 </article>
@@ -1065,7 +1128,7 @@ export default function App() {
           <div className="wrap">
             <span className="eyebrow">Contact</span>
             <p className="contact-line display">Let’s talk <span className="gradient-text">shop.</span></p>
-            <p className="contact-sub">Agentic systems, developer tooling, UI engineering — always up for a good technical conversation.</p>
+            <p className="contact-sub">Agentic systems, engineering leadership, UI engineering — always up for a good technical conversation.</p>
             <div className="contact-actions">
               <a className="btn btn-primary" href={`mailto:${EMAIL}`}>{EMAIL}</a>
               <a className="btn btn-ghost" href={LINKEDIN} target="_blank" rel="noopener noreferrer">LinkedIn</a>
