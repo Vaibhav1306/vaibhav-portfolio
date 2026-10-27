@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 
 const GROQ_KEY = import.meta.env.VITE_GROQ_API_KEY
 
-const GITHUB = 'https://github.com/Vaibhav1306'
 const LINKEDIN = 'https://www.linkedin.com/in/vaibhav-shrivastava-aa637116a/'
 const EMAIL = 'vshrivastava103@gmail.com'
 const RESUME = '/Vaibhav_Shrivastava_Resume.pdf'
@@ -24,7 +23,6 @@ Key facts:
 - Core skills: Angular (expert), TypeScript, JavaScript, Tailwind, RxJS, Cloudflare Workers, Claude Code, LangChain, LangGraph, RAG, Evals, Jasmine/Karma.
 - Email: vshrivastava103@gmail.com
 - LinkedIn: https://www.linkedin.com/in/vaibhav-shrivastava-aa637116a/
-- GitHub: https://github.com/Vaibhav1306
 
 Rules:
 - Always respond in first person, conversational and friendly but professional.
@@ -282,7 +280,6 @@ section[id] { scroll-margin-top: 84px; }
   .sec { padding-block: 64px; }
 }
 @media (max-width: 480px) {
-  .hide-sm { display: none; }
   .panel-head small { display: none; }
   .work-row { grid-template-columns: 1fr; gap: 2px; }
   .toolkit div { grid-template-columns: 1fr; gap: 2px; }
@@ -877,10 +874,6 @@ function Assistant({ inputRef }) {
 }
 
 // ─── PAGE ───────────────────────────────────────────────────────────────────────
-function GithubIcon() {
-  return <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.42c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
-}
-
 export default function App() {
   const [active, setActive] = useState('')
   const [showLauncher, setShowLauncher] = useState(false)
@@ -929,7 +922,7 @@ export default function App() {
             ))}
           </div>
           <div className="nav-right">
-            <a className="btn btn-ghost btn-sm" href={GITHUB} target="_blank" rel="noopener noreferrer"><GithubIcon /><span className="hide-sm">GitHub</span></a>
+            <a className="btn btn-ghost btn-sm" href={LINKEDIN} target="_blank" rel="noopener noreferrer">LinkedIn</a>
             <a className="btn btn-ghost btn-sm" href={RESUME} target="_blank" rel="noopener noreferrer">Résumé</a>
           </div>
         </div>
@@ -946,7 +939,6 @@ export default function App() {
               <p className="hero-sub">I own the UI codebase at Cialfo and drive its AI work. Five-plus years across frontend and AI engineering, on a platform that serves 310,000+ students.</p>
               <div className="hero-actions">
                 <button className="btn btn-primary" onClick={openAssistant}>Ask my assistant</button>
-                <a className="btn btn-ghost" href={GITHUB} target="_blank" rel="noopener noreferrer"><GithubIcon />GitHub</a>
                 <a className="btn btn-ghost" href={LINKEDIN} target="_blank" rel="noopener noreferrer">LinkedIn</a>
                 <a className="btn btn-ghost" href={RESUME} target="_blank" rel="noopener noreferrer">Résumé</a>
               </div>
@@ -1077,7 +1069,6 @@ export default function App() {
             <div className="contact-actions">
               <a className="btn btn-primary" href={`mailto:${EMAIL}`}>{EMAIL}</a>
               <a className="btn btn-ghost" href={LINKEDIN} target="_blank" rel="noopener noreferrer">LinkedIn</a>
-              <a className="btn btn-ghost" href={GITHUB} target="_blank" rel="noopener noreferrer"><GithubIcon />GitHub</a>
             </div>
             <div className="foot">
               <span>© 2026 Vaibhav Shrivastava</span>
