@@ -2,6 +2,11 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 
 const GROQ_KEY = import.meta.env.VITE_GROQ_API_KEY
 
+const GITHUB = 'https://github.com/Vaibhav1306'
+const LINKEDIN = 'https://www.linkedin.com/in/vaibhav-shrivastava-aa637116a/'
+const EMAIL = 'vshrivastava103@gmail.com'
+const RESUME = '/Vaibhav_Shrivastava_Resume.pdf'
+
 const SYSTEM_PROMPT = `You are Vaibhav Shrivastava, a Software Engineering Lead at Manifest Global (Cialfo), speaking in first person in a conversational, friendly but professional tone. Answer questions as if you are Vaibhav himself.
 
 Key facts:
@@ -19,6 +24,7 @@ Key facts:
 - Core skills: Angular (expert), TypeScript, JavaScript, Tailwind, RxJS, Cloudflare Workers, Claude Code, LangChain, LangGraph, RAG, Evals, Jasmine/Karma.
 - Email: vshrivastava103@gmail.com
 - LinkedIn: https://www.linkedin.com/in/vaibhav-shrivastava-aa637116a/
+- GitHub: https://github.com/Vaibhav1306
 
 Rules:
 - Always respond in first person, conversational and friendly but professional.
@@ -44,24 +50,23 @@ const P = {
 }
 
 const GLOBAL_CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; overflow-x: hidden; }
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   background: #17120e; color: #f6efe4;
-  font-size: 15px; line-height: 1.75;
+  font-size: 16px; line-height: 1.7;
   -webkit-font-smoothing: antialiased; overflow-x: hidden; position: relative;
 }
 body::before, body::after { content: ''; position: fixed; z-index: 0; pointer-events: none; filter: blur(30px); }
-body::before { top: -260px; left: 50%; transform: translateX(-50%); width: 900px; height: 640px;
-  background: radial-gradient(ellipse at center, rgba(230,169,92,0.20) 0%, rgba(230,169,92,0.05) 45%, transparent 72%); }
+body::before { top: -260px; left: -120px; width: 900px; height: 640px;
+  background: radial-gradient(ellipse at center, rgba(230,169,92,0.18) 0%, rgba(230,169,92,0.05) 45%, transparent 72%); }
 body::after { bottom: -320px; right: -180px; width: 720px; height: 660px;
-  background: radial-gradient(ellipse at center, rgba(217,140,154,0.13) 0%, transparent 70%); }
+  background: radial-gradient(ellipse at center, rgba(217,140,154,0.11) 0%, transparent 70%); }
+#root { position: relative; z-index: 1; }
 
-.display { font-family: 'Sora', 'Inter', sans-serif; }
-.mono { font-family: 'JetBrains Mono', monospace; }
+.display { font-family: 'Sora', 'Inter', system-ui, sans-serif; }
+.mono { font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; }
 
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -71,6 +76,7 @@ a { text-decoration: none; color: inherit; }
 button { cursor: pointer; font-family: inherit; }
 input { font-family: inherit; }
 input::placeholder { color: #6f6455; }
+:focus-visible { outline: 2px solid #e6a95c; outline-offset: 3px; border-radius: 8px; }
 
 @keyframes bl { 50% { opacity: 0; } }
 .blink { animation: bl 1s step-end infinite; }
@@ -83,28 +89,32 @@ input::placeholder { color: #6f6455; }
   animation: gradientShift 7s linear infinite;
 }
 
-@keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 .stagger > * { animation: fadeUp .7s cubic-bezier(.2,.7,.3,1) both; }
-.stagger > *:nth-child(2){ animation-delay: .08s; }
-.stagger > *:nth-child(3){ animation-delay: .16s; }
-.stagger > *:nth-child(4){ animation-delay: .24s; }
-.stagger > *:nth-child(5){ animation-delay: .32s; }
+.stagger > *:nth-child(2){ animation-delay: .07s; }
+.stagger > *:nth-child(3){ animation-delay: .14s; }
+.stagger > *:nth-child(4){ animation-delay: .21s; }
+.stagger > *:nth-child(5){ animation-delay: .28s; }
 .msg-in { animation: fadeUp .45s cubic-bezier(.2,.7,.3,1) both; }
 
 .btn {
   position: relative; overflow: hidden; border-radius: 11px; font-size: 14px; font-weight: 600;
-  padding: 11px 22px; letter-spacing: .01em;
-  transition: transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .22s ease, filter .22s ease;
+  padding: 11px 20px; letter-spacing: .01em; display: inline-flex; align-items: center; gap: 8px;
+  transition: transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .22s ease, filter .22s ease, border-color .2s;
 }
-.btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
+.btn:hover { transform: translateY(-2px); filter: brightness(1.06); }
 .btn:active { transform: translateY(0) scale(.98); transition-duration: .06s; }
 .btn::after { content: ''; position: absolute; top: 0; bottom: 0; left: -80%; width: 45%;
-  background: linear-gradient(120deg, transparent, rgba(255,255,255,.28), transparent);
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,.26), transparent);
   transform: skewX(-20deg); pointer-events: none; transition: left .55s ease; }
 .btn:hover::after { left: 130%; }
+.btn-primary { background: linear-gradient(100deg, #e6a95c, #d78a56); color: #1c130c; border: none; box-shadow: 0 10px 24px -10px rgba(230,169,92,0.55); }
+.btn-ghost { background: rgba(255,238,214,0.045); color: #dccfbd; border: 1px solid rgba(255,224,190,0.16); }
+.btn-ghost:hover { border-color: rgba(230,169,92,0.45); color: #f6efe4; }
+.btn-sm { padding: 7px 13px; font-size: 13px; border-radius: 10px; }
 
 .chip {
-  border-radius: 22px; font-size: 13px; padding: 8px 15px; font-weight: 500;
+  border-radius: 22px; font-size: 13px; padding: 7px 14px; font-weight: 500;
   background: rgba(255,238,214,0.035); border: 1px solid rgba(255,224,190,0.13); color: #dccfbd;
   transition: transform .16s cubic-bezier(.2,.7,.3,1), background .18s, border-color .18s, color .18s;
   display: inline-flex; align-items: center; gap: 7px;
@@ -118,39 +128,104 @@ input::placeholder { color: #6f6455; }
 .link-underline { position: relative; }
 .link-underline::after { content: ''; position: absolute; left: 0; right: 0; bottom: -5px; height: 2px; border-radius: 2px;
   background: linear-gradient(90deg, #e6a95c, #d98c9a); transform: scaleX(0); transform-origin: left; transition: transform .25s cubic-bezier(.2,.7,.3,1); }
-.link-underline:hover::after { transform: scaleX(1); }
+.link-underline:hover::after, .link-underline.on::after { transform: scaleX(1); }
 
 @keyframes pulseDot { 0% { box-shadow: 0 0 0 0 rgba(230,169,92,.5);} 70% { box-shadow: 0 0 0 7px rgba(230,169,92,0);} 100% { box-shadow: 0 0 0 0 rgba(230,169,92,0);} }
 .pulse-dot { animation: pulseDot 2.4s ease-out infinite; }
 @keyframes micPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(230,169,92,.5);} 70% { box-shadow: 0 0 0 9px rgba(230,169,92,0);} }
 .mic-live { animation: micPulse 1.2s ease-out infinite; }
+@keyframes floaty { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-8px);} }
 
-.nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+/* layout */
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: clamp(18px, 4vw, 32px); }
+section[id] { scroll-margin-top: 84px; }
+.sec { padding-block: 88px; border-top: 1px solid rgba(255,224,190,0.07); }
+.sec-head { display: grid; gap: 10px; margin-bottom: 44px; max-width: 62ch; }
+.eyebrow { font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: #e6a95c; }
+.h2 { font-family: 'Sora', 'Inter', system-ui, sans-serif; font-size: clamp(28px, 3.4vw, 38px); font-weight: 600; line-height: 1.12; letter-spacing: -0.015em; text-wrap: balance; color: #f6efe4; }
+.lede { color: #a2937f; font-size: 16.5px; max-width: 60ch; }
+
+/* nav */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding-top: env(safe-area-inset-top, 0px);
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-  background: rgba(23,18,14,0.72); border-bottom: 1px solid rgba(255,224,190,0.07);
-}
-.nav-inner { max-width: 820px; margin: 0 auto; padding: 0 clamp(16px,4vw,28px); height: 60px; display: flex; align-items: center; justify-content: space-between; }
-.nav-links { display: flex; gap: 22px; align-items: center; }
-.nav-link { background: none; border: none; font-size: 13.5px; font-weight: 500; color: #a2937f; transition: color .2s; }
+  background: rgba(23,18,14,0.78); border-bottom: 1px solid rgba(255,224,190,0.07); }
+.nav-inner { max-width: 1040px; margin: 0 auto; padding-inline: clamp(18px, 4vw, 32px); height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.brand { border: none; background: none; font-size: 16px; font-weight: 700; color: #f6efe4; display: flex; align-items: center; gap: 9px; }
+.brand-mark { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(150deg, #e6a95c, #d98c9a); color: #1c130c; font-size: 12px; font-weight: 700; }
+.nav-links { display: flex; gap: 26px; align-items: center; }
+.nav-link { background: none; border: none; font-size: 14px; font-weight: 500; color: #a2937f; transition: color .2s; }
+.nav-link:hover, .nav-link.on { color: #f6efe4; }
+.nav-right { display: flex; gap: 8px; align-items: center; }
 
-@keyframes floaty { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-7px);} }
-.avatar {
-  width: 84px; height: 84px; border-radius: 50%; padding: 2px; flex-shrink: 0;
+/* hero */
+.hero { padding-top: 152px; padding-bottom: 76px; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 56px; align-items: center; }
+.hero-text { display: grid; gap: 22px; }
+.hero-pill { justify-self: start; display: inline-flex; align-items: center; gap: 8px; font-size: 11.5px; letter-spacing: .14em; font-weight: 600; text-transform: uppercase; color: #e6a95c; background: rgba(230,169,92,0.09); border: 1px solid rgba(230,169,92,0.26); border-radius: 30px; padding: 6px 14px; }
+.hero-pill i { width: 6px; height: 6px; border-radius: 50%; background: #e6a95c; }
+.hero-name { font-family: 'Sora', 'Inter', system-ui, sans-serif; font-size: clamp(44px, 7vw, 76px); font-weight: 700; line-height: 1.0; letter-spacing: -0.03em; color: #f6efe4; }
+.hero-value { font-family: 'Sora', 'Inter', system-ui, sans-serif; font-size: clamp(20px, 2.3vw, 25px); font-weight: 500; line-height: 1.42; color: #f6efe4; max-width: 32ch; text-wrap: balance; }
+.hero-sub { color: #a2937f; font-size: 16px; max-width: 56ch; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.email-line { font-size: 13.5px; color: #a2937f; }
+.email-line a { font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; color: #dccfbd; font-size: 13px; }
+.portrait { width: 176px; height: 176px; border-radius: 50%; padding: 3px; flex-shrink: 0;
   background: linear-gradient(150deg, #e6a95c, #d78a56 55%, #d98c9a);
-  box-shadow: 0 16px 40px -14px rgba(0,0,0,0.7), 0 0 44px rgba(230,169,92,0.22);
-  animation: floaty 6s ease-in-out infinite;
-}
-.avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: center 18%; display: block; }
+  box-shadow: 0 22px 50px -18px rgba(0,0,0,0.75), 0 0 60px rgba(230,169,92,0.22);
+  animation: floaty 6.5s ease-in-out infinite; }
+.portrait img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; background: #241c15; }
+.metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 64px; border-top: 1px solid rgba(255,224,190,0.1); }
+.metric { padding: 22px 24px 4px 0; display: grid; gap: 5px; align-content: start; }
+.metric + .metric { padding-left: 24px; border-left: 1px solid rgba(255,224,190,0.1); }
+.metric b { font-family: 'Sora', 'Inter', system-ui, sans-serif; font-size: clamp(34px, 4vw, 44px); font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+.metric span { font-size: 15px; color: #dccfbd; }
+.metric small { font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; font-size: 12px; color: #a2937f; }
 
-/* stage — centered conversation */
-.stage { position: relative; z-index: 1; height: 100dvh; display: flex; flex-direction: column; padding-top: 60px; }
-.scroll { flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; }
-.scroll-inner { max-width: 820px; margin: 0 auto; padding: 26px clamp(16px,4vw,28px) 14px; }
+/* work */
+.work { display: grid; }
+.work-item { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 40px; padding-block: 34px; border-top: 1px solid rgba(255,224,190,0.08); }
+.work-item:first-child { border-top: 0; padding-top: 0; }
+.work-title { display: grid; gap: 8px; align-content: start; }
+.work-title h3 { font-family: 'Sora', 'Inter', system-ui, sans-serif; font-size: 22px; font-weight: 600; line-height: 1.22; letter-spacing: -0.01em; color: #f6efe4; text-wrap: balance; display: flex; gap: 12px; align-items: baseline; }
+.work-title h3 i { flex: 0 0 auto; width: 9px; height: 9px; border-radius: 50%; transform: translateY(-2px); }
+.work-ctx { font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; font-size: 12px; color: #a2937f; letter-spacing: .04em; padding-left: 21px; }
+.work-body { display: grid; gap: 14px; }
+.work-body p { color: #dccfbd; font-size: 16px; line-height: 1.75; max-width: 62ch; }
+.work-row { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 12px; align-items: baseline; }
+.row-label { font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #e6a95c; }
+.work-row .impact { font-size: 15px; color: #f6efe4; }
+.work-row .tools { font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; font-size: 12.5px; color: #a2937f; }
+.also { margin-top: 44px; padding: 26px 28px; border-radius: 16px; background: rgba(255,238,214,0.03); border: 1px solid rgba(255,224,190,0.08); display: grid; gap: 16px; }
+.also ul { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 32px; }
+.also li { color: #dccfbd; font-size: 15px; padding-left: 18px; position: relative; }
+.also li::before { content: ''; position: absolute; left: 0; top: .72em; width: 6px; height: 6px; border-radius: 50%; background: #d78a56; }
 
-.hero-id { text-align: center; margin-bottom: 26px; display: flex; flex-direction: column; align-items: center; }
-.hero-name { font-size: 46px; font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; }
+/* approach */
+.principles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+.principle { display: grid; gap: 10px; align-content: start; padding-top: 18px; border-top: 2px solid; }
+.principle h3 { font-family: 'Sora', 'Inter', system-ui, sans-serif; font-size: 19px; font-weight: 600; line-height: 1.3; color: #f6efe4; text-wrap: balance; }
+.principle p { color: #dccfbd; font-size: 15.5px; }
 
+/* assistant */
+.assist-grid { display: grid; grid-template-columns: minmax(0, 290px) minmax(0, 1fr); gap: 44px; align-items: start; }
+.assist-copy { display: grid; gap: 16px; }
+.assist-copy > p { color: #dccfbd; font-size: 15.5px; }
+.specs { list-style: none; display: grid; gap: 14px; padding-top: 16px; border-top: 1px solid rgba(255,224,190,0.08); }
+.specs li { display: grid; gap: 2px; font-size: 14px; color: #dccfbd; }
+.specs li span { font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #a2937f; }
+.panel { height: 620px; max-height: 82vh; display: flex; flex-direction: column; border-radius: 20px; overflow: hidden;
+  background: linear-gradient(158deg, rgba(255,238,214,0.05), rgba(255,238,214,0.015));
+  border: 1px solid rgba(255,224,190,0.12);
+  box-shadow: 0 30px 70px -36px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,240,220,0.06); }
+.panel-head { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid rgba(255,224,190,0.08); font-size: 14px; color: #f6efe4; font-weight: 500; }
+.panel-head small { margin-left: auto; font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; font-size: 11px; color: #a2937f; font-weight: 400; }
+.panel-scroll { flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; padding: 20px 18px; display: flex; flex-direction: column; gap: 14px; overscroll-behavior: contain; }
+.panel-idle { margin: auto; text-align: center; display: grid; gap: 16px; justify-items: center; max-width: 440px; padding: 12px 0; }
+.panel-idle h3 { font-family: 'Sora', 'Inter', system-ui, sans-serif; font-size: 20px; font-weight: 600; color: #f6efe4; }
+.panel-idle p { color: #a2937f; font-size: 14.5px; }
+.panel-idle .chips-row { justify-content: center; }
+.panel-dock { padding: 12px 14px 14px; border-top: 1px solid rgba(255,224,190,0.08); display: grid; gap: 10px; background: rgba(23,18,14,0.55); }
+.chips-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .msg-card {
   background: linear-gradient(158deg, rgba(255,238,214,0.055), rgba(255,238,214,0.015));
   border: 1px solid rgba(255,224,190,0.1); border-radius: 18px; padding: 20px 22px;
@@ -158,25 +233,172 @@ input::placeholder { color: #6f6455; }
 }
 .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 
-/* dock — input + topics, pinned below the scroll area (never overlaps messages) */
-.dock { flex: 0 0 auto; z-index: 20; background: #17120e; border-top: 1px solid rgba(255,224,190,0.08); }
-.dock-inner { max-width: 820px; margin: 0 auto; padding: 12px clamp(16px,4vw,28px) 16px; display: flex; flex-direction: column; gap: 10px; }
-.dock-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+/* experience */
+.roles { display: grid; }
+.role { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 40px; padding-block: 28px; border-top: 1px solid rgba(255,224,190,0.08); }
+.role:first-child { border-top: 0; padding-top: 0; }
+.role-when { display: grid; gap: 4px; align-content: start; }
+.role-when .period { font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; font-size: 12.5px; color: #a2937f; }
+.role-when .company { font-size: 14.5px; color: #dccfbd; font-weight: 500; }
+.role h3 { font-family: 'Sora', 'Inter', system-ui, sans-serif; font-size: 19px; font-weight: 600; line-height: 1.3; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.badge { font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; font-size: 10.5px; letter-spacing: .1em; color: #e6a95c; border: 1px solid rgba(230,169,92,0.35); border-radius: 20px; padding: 2px 9px; font-weight: 500; }
+.role ul { list-style: none; display: grid; gap: 8px; margin-top: 12px; }
+.role li { color: #dccfbd; font-size: 15px; padding-left: 18px; position: relative; max-width: 68ch; }
+.role li::before { content: ''; position: absolute; left: 0; top: .8em; width: 8px; height: 1px; background: #a2937f; }
+.facts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 40px; margin-top: 52px; padding-top: 32px; border-top: 1px solid rgba(255,224,190,0.08); }
+.fact { display: grid; gap: 12px; align-content: start; }
+.fact p { color: #dccfbd; font-size: 15px; }
+.toolkit { display: grid; gap: 10px; }
+.toolkit div { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 14px; font-size: 14.5px; color: #dccfbd; }
+.toolkit div span { font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #a2937f; padding-top: 3px; }
 
-@media (max-width: 640px) {
-  .hero-name { font-size: 38px; }
-  .stat-grid { grid-template-columns: 1fr 1fr; }
-  .nav-links a[data-hide] { display: none; }
+/* contact */
+.contact { padding-block: 96px 40px; border-top: 1px solid rgba(255,224,190,0.07); }
+.contact-line { font-family: 'Sora', 'Inter', system-ui, sans-serif; font-size: clamp(32px, 4.6vw, 50px); font-weight: 600; letter-spacing: -0.02em; line-height: 1.08; max-width: 16ch; margin-top: 12px; }
+.contact-sub { color: #a2937f; font-size: 16px; max-width: 52ch; margin-top: 16px; }
+.contact-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; align-items: center; }
+.foot { margin-top: 72px; padding-top: 20px; border-top: 1px solid rgba(255,224,190,0.07); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 13px; color: #6f6455; }
+
+/* floating launcher */
+.launcher { position: fixed; right: clamp(14px, 3vw, 28px); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 90;
+  display: inline-flex; align-items: center; gap: 10px; padding: 8px 16px 8px 8px; border-radius: 999px;
+  background: rgba(36,28,21,0.94); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid rgba(230,169,92,0.35); color: #f6efe4; font-size: 14px; font-weight: 500;
+  box-shadow: 0 18px 40px -16px rgba(0,0,0,0.85); transition: opacity .25s ease, transform .25s ease; }
+.launcher[data-show="false"] { opacity: 0; transform: translateY(12px); pointer-events: none; }
+
+@media (max-width: 860px) {
+  .nav-links { display: none; }
+  .hero { padding-top: 112px; padding-bottom: 56px; }
+  .hero-grid { grid-template-columns: 1fr; gap: 28px; }
+  .portrait { width: 116px; height: 116px; order: -1; }
+  .metrics { grid-template-columns: 1fr; margin-top: 44px; }
+  .metric { padding: 18px 0; }
+  .metric + .metric { padding-left: 0; border-left: 0; border-top: 1px solid rgba(255,224,190,0.1); }
+  .work-item, .role, .assist-grid, .facts { grid-template-columns: 1fr; gap: 14px; }
+  .work-ctx { padding-left: 21px; }
+  .principles, .also ul { grid-template-columns: 1fr; }
+  .panel { height: 580px; max-height: 80vh; }
+  .sec { padding-block: 64px; }
 }
-
+@media (max-width: 480px) {
+  .hide-sm { display: none; }
+  .panel-head small { display: none; }
+  .work-row { grid-template-columns: 1fr; gap: 2px; }
+  .toolkit div { grid-template-columns: 1fr; gap: 2px; }
+  .also { padding: 20px; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .stagger > *, .msg-in, .pulse-dot, .mic-live, .gradient-text, .avatar { animation: none; }
-  .btn, .chip, .skill-tag, .link-underline::after { transition: none; }
+  html { scroll-behavior: auto; }
+  .stagger > *, .msg-in, .pulse-dot, .mic-live, .gradient-text, .portrait { animation: none; }
+  .btn, .chip, .skill-tag, .link-underline::after, .launcher { transition: none; }
   .btn:hover, .chip:hover, .skill-tag:hover { transform: none; }
 }
 `
 
-// ─── DATA ───────────────────────────────────────────────────────────────────────
+// ─── CONTENT ────────────────────────────────────────────────────────────────────
+const HERO_METRICS = [
+  { value: '~75%', label: 'faster delivery', note: 'PMs & designers: days → hours', color: P.amber },
+  { value: '~30%', label: 'lower page-load time', note: 'Web Vitals work, core platform', color: P.copper },
+  { value: '310K+', label: 'students on the platform', note: '1,000+ universities · 105+ countries', color: P.rose },
+]
+
+const WORK = [
+  {
+    title: 'No-dev agentic pipeline', ctx: 'Cialfo · architect', color: P.amber,
+    body: 'Claude-powered agentic pipelines that let PMs and designers — three to five non-engineers — generate and ship production-ready code on their own.',
+    impact: 'Prototype-to-review went from days to hours, with ~75% higher delivery velocity.',
+    tools: 'Claude Code · agentic workflows · Claude Code skills',
+    short: "Claude-powered pipelines that let PMs & designers ship production-ready code independently — days to hours.",
+  },
+  {
+    title: 'Claude Code skill library & safety gates', ctx: 'Cialfo · owner', color: P.copper,
+    body: 'The end-to-end skill library that powers the no-dev workflow platform, plus the pre-commit hooks and automated validation gates that let non-developers contribute to production codebases.',
+    impact: 'Non-engineer contributions land in production with CI/CD compliance.',
+    tools: 'Claude Code skills · pre-commit hooks · CI/CD',
+    short: 'The skill library behind the no-dev platform, plus pre-commit gates that keep non-developer contributions safe.',
+  },
+  {
+    title: 'Code review on autopilot', ctx: 'Cialfo', color: P.rose,
+    body: 'Claude routines — scheduled agents — review every change and surface issues automatically, so a review never depends on someone remembering to start one.',
+    impact: 'Every change gets a review pass, with no manual kickoff.',
+    tools: 'Claude routines',
+    short: 'Claude routines review every change and surface issues automatically — no manual kickoff.',
+  },
+  {
+    title: 'Multi-brand AI chatbot', ctx: 'Cialfo', color: P.sand,
+    body: 'Production chatbot features across multiple brands on Cloudflare Workers, grounded with Cloudflare-managed RAG and tool integrations, with brand-specific configuration and workflow isolation at the platform level.',
+    impact: 'One chatbot platform serving several brands, each isolated in config and workflow.',
+    tools: 'Cloudflare Workers · Cloudflare RAG · tool integrations',
+    short: 'Production chatbot features across brands on Cloudflare Workers with managed RAG.',
+  },
+]
+
+const ALSO = [
+  '~30% page-load-time reduction and LCP gains across the core platform — Web Vitals profiling, lazy loading, asset-pipeline refactoring.',
+  'Serverless APIs on Cloudflare Workers and Wrangler, wiring CRM workflows and AI-assisted responses into production flows.',
+  'A scalable Angular component library with Tailwind CSS and Angular Material, plus Segment event tracking.',
+  'Mentored two AI engineering interns through to on-time delivery.',
+]
+
+const PRINCIPLES = [
+  { title: 'Guardrails before autonomy', color: P.amber, body: 'Non-engineers ship through pre-commit hooks and automated validation gates, so moving faster never means skipping the checks.' },
+  { title: 'Ground the model in what’s true', color: P.copper, body: 'Assistants answer from a defined source of truth — managed RAG for the brand chatbots, a fixed set of facts for the assistant on this page — and redirect what’s out of scope.' },
+  { title: 'Automate the loop, not just the task', color: P.rose, body: 'Review runs on every change through scheduled Claude routines, so quality doesn’t depend on someone remembering to ask for it.' },
+]
+
+const ROLES = [
+  {
+    role: 'Software Engineering Lead', company: 'Manifest Global (Cialfo)', period: 'Aug 2026 – Present', current: true, color: P.amber,
+    bullets: [
+      'Promoted to Lead for expanding the agentic platform beyond its original scope; own end-to-end delivery of business-critical projects across Product, Design, Business and QA.',
+      'Own the UI repository end-to-end and drive the company’s AI initiatives, setting technical direction across UI and agentic surfaces.',
+      'Lead the agentic chat experience from interaction design to production reliability, and build internal developer tools used across the UI.',
+      'Automated code review with Claude routines that review every change without manual kickoff.',
+    ],
+  },
+  {
+    role: 'Senior Software Engineer', company: 'Manifest Global (Cialfo)', period: 'Apr 2025 – Aug 2026', color: P.copper,
+    bullets: [
+      'Architected Claude-powered agentic pipelines letting PMs and designers (3–5 non-engineers) ship production-ready prototypes independently — prototype-to-review went from days to hours, with ~75% higher delivery velocity.',
+      'Wrote and iteratively optimized Claude Code skills; owned the end-to-end skill library powering the no-dev workflow platform.',
+      'Built pre-commit hooks and automated validation gates so non-developers could contribute to production codebases with CI/CD compliance.',
+      'Delivered multi-brand production AI chatbot features on Cloudflare Workers with Cloudflare-managed RAG and tool integrations.',
+      'Drove a ~30% page-load-time reduction and LCP gains through Web Vitals profiling, lazy loading and asset-pipeline refactoring.',
+      'Mentored two AI engineering interns to on-time delivery.',
+    ],
+  },
+  {
+    role: 'Frontend Engineer', company: 'Manifest Global (Cialfo)', period: 'Jul 2023 – Apr 2025', color: P.rose,
+    bullets: [
+      'Independently owned multiple frontend projects; worked directly with PMs and designers to define MVP scope and demo to leadership.',
+      'Designed and deployed serverless APIs with Cloudflare Workers and Wrangler, integrating CRM workflows and AI-assisted responses into production flows.',
+      'Built a scalable component library in Angular, Tailwind CSS and Angular Material; added Segment event tracking for data-driven product decisions.',
+    ],
+  },
+  {
+    role: 'Software Engineer – Frontend', company: 'MAQ Software', period: 'May 2022 – Jun 2023', color: P.sand,
+    bullets: [
+      'Built production-grade Angular applications for enterprise clients with a modular architecture.',
+      'Authored Jasmine/Karma unit tests at 91%+ coverage as a mandatory QA gate.',
+    ],
+  },
+  {
+    role: 'Application Development Associate', company: 'Accenture', period: 'Jul 2021 – Mar 2022', color: P.textMuted,
+    bullets: [
+      'Contributed to enterprise-scale Angular applications in Agile delivery teams, with a focus on component design and code review.',
+    ],
+  },
+]
+
+const TOOLKIT = [
+  ['Frontend', 'Angular (expert), TypeScript, JavaScript, RxJS, Tailwind CSS, Angular Material'],
+  ['AI', 'Claude Code & routines, LangChain, LangGraph, RAG, evals, agentic workflows'],
+  ['Cloud', 'Cloudflare Workers, Wrangler, serverless APIs'],
+  ['Quality', 'Jasmine, Karma, Jest, Segment analytics'],
+]
+
+// chat cards
 const STATS = [
   { value: '~75%', label: 'Delivery velocity gain', color: P.amber },
   { value: '~30%', label: 'Page-load-time reduction', color: P.copper },
@@ -184,26 +406,11 @@ const STATS = [
   { value: '310K+', label: 'Students on the platform', color: P.sand },
 ]
 
-const WORK = [
-  { title: 'Agentic AI pipelines', body: "Claude-powered pipelines that let PMs & designers ship production-ready code independently — the core of Cialfo's no-dev workflow platform.", color: P.amber },
-  { title: 'Claude Code skill library', body: 'Own the end-to-end skill library powering the no-dev workflow platform, plus pre-commit infrastructure that lets non-developers contribute to production safely.', color: P.copper },
-  { title: 'Code review on autopilot', body: 'Claude routines review every change and surface issues automatically — no manual kickoff.', color: P.rose },
-  { title: 'Multi-brand AI chatbot', body: 'Delivered production chatbot features on Cloudflare Workers with managed RAG; drove a ~30% page-load-time reduction.', color: P.sand },
-]
-
 const SKILLS = [
   { category: 'Frontend', color: P.amber, items: ['Angular', 'TypeScript', 'JavaScript (ES6+)', 'HTML5', 'CSS3', 'Tailwind CSS', 'Angular Material', 'RxJS'] },
   { category: 'Cloud / Backend', color: P.copper, items: ['Cloudflare Workers', 'Wrangler', 'Serverless API Design'] },
   { category: 'AI & Agentic', color: P.rose, items: ['Claude Code', 'Claude Routines', 'LangChain', 'LangGraph', 'Agentic Workflows', 'No-dev Pipelines', 'Cloudflare RAG', 'Tool Integrations'] },
   { category: 'Testing & Analytics', color: P.sand, items: ['Jasmine', 'Karma', 'Jest', 'Unit Testing (91%+)', 'Evals', 'Automated Code Review', 'Segment'] },
-]
-
-const EXPERIENCE = [
-  { role: 'Software Engineering Lead', company: 'Manifest Global (Cialfo)', period: 'Aug 2026 – Present', current: true, color: P.amber },
-  { role: 'Senior Software Engineer', company: 'Manifest Global (Cialfo)', period: 'Apr 2025 – Aug 2026', current: false, color: P.copper },
-  { role: 'Frontend Engineer', company: 'Manifest Global (Cialfo)', period: 'Jul 2023 – Apr 2025', current: false, color: P.rose },
-  { role: 'Software Engineer – Frontend', company: 'MAQ Software', period: 'May 2022 – Jun 2023', current: false, color: P.sand },
-  { role: 'Application Development Associate', company: 'Accenture', period: 'Jul 2021 – Mar 2022', current: false, color: P.textMuted },
 ]
 
 const ABOUT = "I'm a Software Engineering Lead at Cialfo — a Series B EdTech SaaS ($77M raised) serving 310,000+ students and 1,000+ universities across 105+ countries. I own the UI codebase and drive the company's AI-front work, building systems that let non-engineers ship production code."
@@ -214,7 +421,6 @@ const SUGGESTED_PROMPTS = [
   'How do you approach system design?',
 ]
 
-// topics that reveal rich cards inside the conversation
 const TOPICS = [
   { key: 'work', label: 'My work' },
   { key: 'stats', label: 'The numbers' },
@@ -232,38 +438,28 @@ const TOPIC_META = {
   about:    { q: 'Tell me about yourself',       a: 'The short version —' },
 }
 
-// ─── NAV ──────────────────────────────────────────────────────────────────────
-function Nav() {
-  return (
-    <nav className="nav">
-      <div className="nav-inner">
-        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="display" style={{ border: 'none', background: 'none', fontSize: 16, fontWeight: 700, color: P.textPri, display: 'flex', alignItems: 'center', gap: 9 }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: 8, background: 'linear-gradient(150deg, #e6a95c, #d98c9a)', color: '#1c130c', fontSize: 12, fontWeight: 700 }}>V</span>
-          Vaibhav
-        </button>
-        <div className="nav-links">
-          <a className="nav-link link-underline" data-hide href="mailto:vshrivastava103@gmail.com">Email</a>
-          <a className="nav-link link-underline" href="https://www.linkedin.com/in/vaibhav-shrivastava-aa637116a/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-          <a className="nav-link link-underline" href="/Vaibhav_Shrivastava_Resume.pdf" target="_blank" rel="noopener noreferrer">Résumé</a>
-        </div>
-      </div>
-    </nav>
-  )
-}
+const NAV = [
+  { id: 'work', label: 'Work' },
+  { id: 'approach', label: 'Approach' },
+  { id: 'assistant', label: 'Assistant' },
+  { id: 'experience', label: 'Experience' },
+]
+
+const scrollToId = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
 // ─── RICH CARDS (revealed inside the conversation) ──────────────────────────────
-function CardShell({ children }) {
-  return (
-    <div className="msg-in" style={{ alignSelf: 'flex-start', maxWidth: '92%', display: 'flex', gap: 10, width: '100%' }}>
-      <VAvatar />
-      <div className="msg-card" style={{ flex: 1 }}>{children}</div>
-    </div>
-  )
-}
-
 function VAvatar() {
   return (
     <span className="display" style={{ flexShrink: 0, width: 26, height: 26, borderRadius: 8, background: 'linear-gradient(150deg, #e6a95c, #d98c9a)', color: '#1c130c', fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>V</span>
+  )
+}
+
+function CardShell({ children }) {
+  return (
+    <div className="msg-in" style={{ alignSelf: 'flex-start', maxWidth: '94%', display: 'flex', gap: 10, width: '100%' }}>
+      <VAvatar />
+      <div className="msg-card" style={{ flex: 1, minWidth: 0 }}>{children}</div>
+    </div>
   )
 }
 
@@ -316,7 +512,7 @@ function WorkCard() {
         {WORK.map((w, i) => (
           <div key={i} style={{ borderLeft: `2px solid ${w.color}`, paddingLeft: 13 }}>
             <div className="display" style={{ color: P.textPri, fontSize: 14.5, fontWeight: 600, marginBottom: 4 }}>{w.title}</div>
-            <div style={{ color: P.textMuted, fontSize: 13, lineHeight: 1.65, fontWeight: 300 }}>{w.body}</div>
+            <div style={{ color: P.textMuted, fontSize: 13, lineHeight: 1.65, fontWeight: 300 }}>{w.short}</div>
           </div>
         ))}
       </div>
@@ -349,7 +545,7 @@ function TimelineCard() {
     <CardShell>
       <CardHeader label="Experience" color={P.copper} />
       <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
-        {EXPERIENCE.map((e, i) => (
+        {ROLES.map((e, i) => (
           <div key={i} style={{ borderLeft: `2px solid ${e.color}`, paddingLeft: 13 }}>
             {e.current && <span className="mono" style={{ fontSize: 9, color: e.color, letterSpacing: '.08em', fontWeight: 600 }}>● CURRENT</span>}
             <div className="display" style={{ color: e.color, fontSize: 13.5, fontWeight: 600, marginTop: e.current ? 3 : 0 }}>{e.role}</div>
@@ -386,7 +582,7 @@ function UserBubble({ content }) {
 
 function AiBubble({ content }) {
   return (
-    <div className="msg-in" style={{ alignSelf: 'flex-start', maxWidth: '84%', display: 'flex', gap: 10 }}>
+    <div className="msg-in" style={{ alignSelf: 'flex-start', maxWidth: '86%', display: 'flex', gap: 10 }}>
       <VAvatar />
       <div style={{ background: P.aiBg, border: `1px solid ${P.border}`, borderRadius: '4px 14px 14px 14px', padding: '11px 16px', color: P.textSec, fontSize: 14, lineHeight: 1.75, fontWeight: 300 }}>{content}</div>
     </div>
@@ -394,7 +590,7 @@ function AiBubble({ content }) {
 }
 
 // ─── CHAT INPUT ───────────────────────────────────────────────────────────────
-function ChatInput({ input, setInput, onSend, onKey, disabled, micSupported, listening, transcribing, onMic }) {
+function ChatInput({ input, setInput, onSend, onKey, disabled, micSupported, listening, transcribing, onMic, inputRef }) {
   const [focused, setFocused] = useState(false)
   const iconBtn = (active, color) => ({
     display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
@@ -405,13 +601,15 @@ function ChatInput({ input, setInput, onSend, onKey, disabled, micSupported, lis
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 9,
-      background: 'rgba(36,28,21,0.85)', backdropFilter: 'blur(10px)',
+      background: 'rgba(36,28,21,0.85)',
       border: `1px solid ${listening ? P.amber : (focused ? 'rgba(230,169,92,0.45)' : 'rgba(255,224,190,0.13)')}`,
-      borderRadius: 16, padding: '9px 11px',
-      boxShadow: '0 20px 44px -22px rgba(0,0,0,0.7)',
+      borderRadius: 16, padding: '8px 10px',
       transition: 'border-color 0.2s', opacity: disabled ? 0.65 : 1,
     }}>
       <input
+        ref={inputRef}
+        id="assistant-input"
+        aria-label="Ask the assistant"
         value={input}
         onChange={e => setInput(e.target.value)}
         onKeyDown={onKey}
@@ -437,18 +635,18 @@ function ChatInput({ input, setInput, onSend, onKey, disabled, micSupported, lis
   )
 }
 
-// ─── APP (the conversation is the site) ─────────────────────────────────────────
-export default function App() {
+// ─── ASSISTANT (the chat, mic and topic cards) ──────────────────────────────────
+function Assistant({ inputRef }) {
   const [messages, setMessages] = useState([])
   const [history, setHistory] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [typingText, setTypingText] = useState('')
   const [isTyping, setIsTyping] = useState(false)
-  const endRef = useRef(null)
   const scrollRef = useRef(null)
   const nextId = useRef(0)
 
+  const [micSupported, setMicSupported] = useState(false)
   const [listening, setListening] = useState(false)
   const [transcribing, setTranscribing] = useState(false)
   const recorderRef = useRef(null)
@@ -457,10 +655,15 @@ export default function App() {
   const stopTimerRef = useRef(null)
   const audioCtxRef = useRef(null)
   const vadIntervalRef = useRef(null)
-  const micSupported = typeof window !== 'undefined' && typeof navigator !== 'undefined' && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) && 'MediaRecorder' in window
+
+  // detect mic support after mount so the server-rendered HTML matches the first client render
+  useEffect(() => {
+    setMicSupported(!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) && 'MediaRecorder' in window)
+  }, [])
 
   const started = messages.length > 0 || loading || isTyping
 
+  // keep the newest message in view inside the panel (never scrolls the page)
   useEffect(() => {
     if (!started) return
     const el = scrollRef.current
@@ -578,7 +781,7 @@ export default function App() {
       rec.start()
       setListening(true)
 
-      // voice-activity detection: auto-stop ~1.1s after the user stops talking
+      // voice-activity detection: auto-stop ~1s after the user stops talking
       try {
         const Ctx = window.AudioContext || window.webkitAudioContext
         const ctx = new Ctx()
@@ -615,76 +818,278 @@ export default function App() {
   }, [micSupported, transcribe])
 
   return (
-    <>
-      <style>{GLOBAL_CSS}</style>
-      <Nav />
-      <main className="stage">
-        <div className="scroll" ref={scrollRef} style={!started ? { display: 'flex', flexDirection: 'column', justifyContent: 'center' } : undefined}>
-          <div className="scroll-inner">
-          {/* identity */}
-          <div className="hero-id stagger">
-            <div className="avatar"><img src="/avatar.png" alt="Vaibhav Shrivastava" /></div>
-            <div style={{ marginTop: 18, fontSize: 10.5, letterSpacing: '.18em', fontWeight: 600, textTransform: 'uppercase', color: P.amber }}>Software Engineering Lead · Cialfo</div>
-            <h1 className="display hero-name" style={{ marginTop: 12 }}>
-              Hi, I'm <span className="gradient-text">Vaibhav</span>
-            </h1>
-            <p style={{ color: P.textMuted, fontSize: 15, fontWeight: 300, marginTop: 14, maxWidth: 480, lineHeight: 1.7 }}>
-              I lead UI and agentic AI at Cialfo. Instead of scrolling a résumé — just ask me anything, by text or voice. Or tap a topic to explore.
-            </p>
-            {!started && (
-              <div className="dock-chips" style={{ marginTop: 22 }}>
-                {SUGGESTED_PROMPTS.map((p, i) => (
-                  <button key={i} className="chip" onClick={() => sendMessage(p)}>{p}</button>
-                ))}
-              </div>
-            )}
-          </div>
+    <div className="panel">
+      <div className="panel-head">
+        <VAvatar />
+        Vaibhav’s assistant
+        <small>grounded · voice input</small>
+      </div>
 
-          {/* conversation stream */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {messages.map(msg => {
-              if (msg.role === 'user') return <UserBubble key={msg.id} content={msg.content} />
-              if (msg.role === 'card') { const C = CARDS[msg.kind]; return C ? <C key={msg.id} /> : null }
-              return <AiBubble key={msg.id} content={msg.content} />
-            })}
-
-            {loading && (
-              <div className="msg-in" style={{ alignSelf: 'flex-start', display: 'flex', gap: 10 }}>
-                <VAvatar />
-                <div style={{ background: P.aiBg, border: `1px solid ${P.border}`, borderRadius: '4px 14px 14px 14px', padding: '11px 16px', color: P.textMuted, fontSize: 14 }}>thinking<span className="blink">_</span></div>
-              </div>
-            )}
-            {isTyping && typingText && (
-              <div className="msg-in" style={{ alignSelf: 'flex-start', maxWidth: '84%', display: 'flex', gap: 10 }}>
-                <VAvatar />
-                <div style={{ background: P.aiBg, border: `1px solid ${P.border}`, borderRadius: '4px 14px 14px 14px', padding: '11px 16px', color: P.textSec, fontSize: 14, lineHeight: 1.75, fontWeight: 300 }}>{typingText}<span className="blink" style={{ fontSize: 12 }}>_</span></div>
-              </div>
-            )}
-            <div ref={endRef} />
-          </div>
-          </div>
-        </div>
-
-        {/* dock: topics + input, pinned below the scroll area */}
-        <div className="dock">
-          <div className="dock-inner">
-            <div className="dock-chips">
-              {TOPICS.map(t => (
-                <button key={t.key} className="chip chip-accent" onClick={() => revealTopic(t.key)}>{t.label}</button>
+      <div className="panel-scroll" ref={scrollRef}>
+        {!started && (
+          <div className="panel-idle">
+            <h3>Ask me anything about my work</h3>
+            <p>Type a question, tap the mic, or pick a topic below for a quick tour.</p>
+            <div className="chips-row">
+              {SUGGESTED_PROMPTS.map((p, i) => (
+                <button key={i} className="chip" onClick={() => sendMessage(p)}>{p}</button>
               ))}
             </div>
-            <ChatInput
-              input={input} setInput={setInput}
-              onSend={() => sendMessage(input)} onKey={handleKey}
-              disabled={loading || isTyping}
-              micSupported={micSupported} listening={listening} transcribing={transcribing} onMic={startListening}
-            />
-            <div style={{ textAlign: 'center', color: P.faint, fontSize: 11 }}>
-              © 2026 Vaibhav Shrivastava · Groq-powered · voice input
-            </div>
+          </div>
+        )}
+
+        {messages.map(msg => {
+          if (msg.role === 'user') return <UserBubble key={msg.id} content={msg.content} />
+          if (msg.role === 'card') { const C = CARDS[msg.kind]; return C ? <C key={msg.id} /> : null }
+          return <AiBubble key={msg.id} content={msg.content} />
+        })}
+
+        {loading && (
+          <div className="msg-in" style={{ alignSelf: 'flex-start', display: 'flex', gap: 10 }}>
+            <VAvatar />
+            <div style={{ background: P.aiBg, border: `1px solid ${P.border}`, borderRadius: '4px 14px 14px 14px', padding: '11px 16px', color: P.textMuted, fontSize: 14 }}>thinking<span className="blink">_</span></div>
+          </div>
+        )}
+        {isTyping && typingText && (
+          <div className="msg-in" style={{ alignSelf: 'flex-start', maxWidth: '86%', display: 'flex', gap: 10 }}>
+            <VAvatar />
+            <div style={{ background: P.aiBg, border: `1px solid ${P.border}`, borderRadius: '4px 14px 14px 14px', padding: '11px 16px', color: P.textSec, fontSize: 14, lineHeight: 1.75, fontWeight: 300 }}>{typingText}<span className="blink" style={{ fontSize: 12 }}>_</span></div>
+          </div>
+        )}
+      </div>
+
+      <div className="panel-dock">
+        <div className="chips-row">
+          {TOPICS.map(t => (
+            <button key={t.key} className="chip chip-accent" onClick={() => revealTopic(t.key)}>{t.label}</button>
+          ))}
+        </div>
+        <ChatInput
+          input={input} setInput={setInput}
+          onSend={() => sendMessage(input)} onKey={handleKey}
+          disabled={loading || isTyping}
+          micSupported={micSupported} listening={listening} transcribing={transcribing} onMic={startListening}
+          inputRef={inputRef}
+        />
+      </div>
+    </div>
+  )
+}
+
+// ─── PAGE ───────────────────────────────────────────────────────────────────────
+function GithubIcon() {
+  return <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.42c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
+}
+
+export default function App() {
+  const [active, setActive] = useState('')
+  const [showLauncher, setShowLauncher] = useState(false)
+  const inputRef = useRef(null)
+
+  const openAssistant = useCallback(() => {
+    scrollToId('assistant')
+    setTimeout(() => { try { inputRef.current?.focus({ preventScroll: true }) } catch { /* ignore */ } }, 650)
+  }, [])
+
+  // highlight the nav link for the section in view
+  useEffect(() => {
+    const els = NAV.map(n => document.getElementById(n.id)).filter(Boolean)
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id) })
+    }, { rootMargin: '-45% 0px -50% 0px' })
+    els.forEach(el => io.observe(el))
+    return () => io.disconnect()
+  }, [])
+
+  // floating "Ask my assistant" appears after the hero, hides while the assistant is on screen
+  useEffect(() => {
+    const assistant = document.getElementById('assistant')
+    let assistantVisible = false
+    const update = () => setShowLauncher(window.scrollY > 520 && !assistantVisible)
+    const io = new IntersectionObserver(([e]) => { assistantVisible = e.isIntersecting; update() }, { threshold: 0.15 })
+    if (assistant) io.observe(assistant)
+    window.addEventListener('scroll', update, { passive: true })
+    update()
+    return () => { io.disconnect(); window.removeEventListener('scroll', update) }
+  }, [])
+
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: GLOBAL_CSS }} />
+
+      <nav className="nav" aria-label="Primary">
+        <div className="nav-inner">
+          <button className="brand display" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <span className="brand-mark">V</span>
+            Vaibhav
+          </button>
+          <div className="nav-links">
+            {NAV.map(n => (
+              <button key={n.id} className={`nav-link link-underline${active === n.id ? ' on' : ''}`} onClick={() => scrollToId(n.id)}>{n.label}</button>
+            ))}
+          </div>
+          <div className="nav-right">
+            <a className="btn btn-ghost btn-sm" href={GITHUB} target="_blank" rel="noopener noreferrer"><GithubIcon /><span className="hide-sm">GitHub</span></a>
+            <a className="btn btn-ghost btn-sm" href={RESUME} target="_blank" rel="noopener noreferrer">Résumé</a>
           </div>
         </div>
+      </nav>
+
+      <main>
+        {/* HERO */}
+        <header className="hero wrap">
+          <div className="hero-grid">
+            <div className="hero-text stagger">
+              <span className="hero-pill"><i className="pulse-dot" />Software Engineering Lead · Cialfo</span>
+              <h1 className="hero-name">Vaibhav<br /><span className="gradient-text">Shrivastava</span></h1>
+              <p className="hero-value">I build agentic systems that let non-engineers ship production code — with the guardrails that keep it safe.</p>
+              <p className="hero-sub">I own the UI codebase at Cialfo and drive its AI work. Five-plus years across frontend and AI engineering, on a platform that serves 310,000+ students.</p>
+              <div className="hero-actions">
+                <button className="btn btn-primary" onClick={openAssistant}>Ask my assistant</button>
+                <a className="btn btn-ghost" href={GITHUB} target="_blank" rel="noopener noreferrer"><GithubIcon />GitHub</a>
+                <a className="btn btn-ghost" href={LINKEDIN} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                <a className="btn btn-ghost" href={RESUME} target="_blank" rel="noopener noreferrer">Résumé</a>
+              </div>
+            </div>
+            <div className="portrait">
+              <img src="/avatar.webp" width="320" height="320" alt="Portrait of Vaibhav Shrivastava" />
+            </div>
+          </div>
+
+          <div className="metrics">
+            {HERO_METRICS.map(m => (
+              <div className="metric" key={m.label}>
+                <b style={{ color: m.color }}>{m.value}</b>
+                <span>{m.label}</span>
+                <small>{m.note}</small>
+              </div>
+            ))}
+          </div>
+        </header>
+
+        {/* WORK */}
+        <section id="work" className="sec">
+          <div className="wrap">
+            <div className="sec-head">
+              <span className="eyebrow">Selected work</span>
+              <h2 className="h2">Systems that change who gets to ship</h2>
+            </div>
+            <div className="work">
+              {WORK.map(w => (
+                <article className="work-item" key={w.title}>
+                  <div className="work-title">
+                    <h3><i style={{ background: w.color }} />{w.title}</h3>
+                    <span className="work-ctx">{w.ctx}</span>
+                  </div>
+                  <div className="work-body">
+                    <p>{w.body}</p>
+                    <div className="work-row"><span className="row-label">Impact</span><span className="impact">{w.impact}</span></div>
+                    <div className="work-row"><span className="row-label">Tools</span><span className="tools">{w.tools}</span></div>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="also">
+              <span className="eyebrow" style={{ color: P.copper }}>Also shipped</span>
+              <ul>{ALSO.map(a => <li key={a}>{a}</li>)}</ul>
+            </div>
+          </div>
+        </section>
+
+        {/* APPROACH */}
+        <section id="approach" className="sec">
+          <div className="wrap">
+            <div className="sec-head">
+              <span className="eyebrow">How I build with AI</span>
+              <h2 className="h2">Speed is only useful if it’s safe to keep</h2>
+            </div>
+            <div className="principles">
+              {PRINCIPLES.map(p => (
+                <div className="principle" key={p.title} style={{ borderTopColor: p.color }}>
+                  <h3>{p.title}</h3>
+                  <p>{p.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ASSISTANT */}
+        <section id="assistant" className="sec">
+          <div className="wrap assist-grid">
+            <div className="assist-copy">
+              <span className="eyebrow">This site is an agent</span>
+              <h2 className="h2">Ask it about my work</h2>
+              <p>Type a question or speak it. Tap a topic for a quick tour, or ask anything in your own words.</p>
+              <ul className="specs">
+                <li><span>Model</span>gpt-oss-120b, served by Groq</li>
+                <li><span>Grounding</span>A fixed set of facts about my work — it won’t invent details</li>
+                <li><span>Scope</span>Stays on my work and redirects anything else</li>
+                <li><span>Voice</span>Whisper large-v3-turbo, tuned for names like Cialfo; stops listening a second after you pause</li>
+              </ul>
+            </div>
+            <Assistant inputRef={inputRef} />
+          </div>
+        </section>
+
+        {/* EXPERIENCE */}
+        <section id="experience" className="sec">
+          <div className="wrap">
+            <div className="sec-head">
+              <span className="eyebrow">Experience</span>
+              <h2 className="h2">Five years, from components to agents</h2>
+            </div>
+            <div className="roles">
+              {ROLES.map(r => (
+                <article className="role" key={r.role + r.period}>
+                  <div className="role-when">
+                    <span className="period">{r.period}</span>
+                    <span className="company">{r.company}</span>
+                  </div>
+                  <div>
+                    <h3 style={{ color: r.color }}>{r.role}{r.current && <span className="badge">CURRENT</span>}</h3>
+                    <ul>{r.bullets.map(b => <li key={b}>{b}</li>)}</ul>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="facts">
+              <div className="fact">
+                <span className="eyebrow" style={{ color: P.copper }}>Education</span>
+                <p>B.Tech, Information Technology — Technocrats Institute of Technology, Bhopal. CGPA 8.64, 2021.</p>
+              </div>
+              <div className="fact">
+                <span className="eyebrow" style={{ color: P.copper }}>Toolkit</span>
+                <div className="toolkit">
+                  {TOOLKIT.map(([k, v]) => <div key={k}><span>{k}</span>{v}</div>)}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CONTACT */}
+        <footer className="contact">
+          <div className="wrap">
+            <span className="eyebrow">Contact</span>
+            <p className="contact-line display">Let’s talk <span className="gradient-text">shop.</span></p>
+            <p className="contact-sub">Agentic systems, developer tooling, UI engineering — always up for a good technical conversation.</p>
+            <div className="contact-actions">
+              <a className="btn btn-primary" href={`mailto:${EMAIL}`}>{EMAIL}</a>
+              <a className="btn btn-ghost" href={LINKEDIN} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+              <a className="btn btn-ghost" href={GITHUB} target="_blank" rel="noopener noreferrer"><GithubIcon />GitHub</a>
+            </div>
+            <div className="foot">
+              <span>© 2026 Vaibhav Shrivastava</span>
+              <span>Built with React · Groq · Whisper</span>
+            </div>
+          </div>
+        </footer>
       </main>
+
+      <button className="launcher" data-show={showLauncher ? 'true' : 'false'} onClick={openAssistant} aria-label="Ask my assistant" tabIndex={showLauncher ? 0 : -1}>
+        <VAvatar />Ask my assistant
+      </button>
     </>
   )
 }
